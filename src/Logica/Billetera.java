@@ -1,5 +1,7 @@
 package Logica;
 
+import Logica.Excepciones.SaldoInsuficienteException;
+
 import java.util.List;
 
 public class Billetera {
@@ -40,7 +42,7 @@ else {
     if (this.saldo >= transaccion.getMonto()){
         actualizarSaldo(-transaccion.getMonto());
     } else {
-        //excepcion
+        throw new SaldoInsuficienteException("No cuenta con el saldo suficiente");
     }
 }
 }
