@@ -17,8 +17,6 @@ private List<Transaccion> transacciones;
     }
 
     //Metodos
-
-
     public double getSaldo() {
         return saldo;
     }
@@ -29,8 +27,9 @@ private List<Transaccion> transacciones;
     public List<Transaccion> getHistorial(){
         return transacciones;
         }
-protected void actualizarSaldo(double monto){
 
+protected void actualizarSaldo(double monto){
+saldo+=monto;
 }
 protected void agregarTransaccion(Transaccion transaccion){
 this.transacciones.add(transaccion);
@@ -46,7 +45,6 @@ else {
     }
 }
 }
-
 }
 
 

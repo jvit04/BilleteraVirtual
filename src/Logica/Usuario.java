@@ -36,4 +36,7 @@ public class Usuario {
     public Billetera getBilletera() {
         return billetera;
     }
+    public String getNombre() {
+        return nombre;
+    }
 }
