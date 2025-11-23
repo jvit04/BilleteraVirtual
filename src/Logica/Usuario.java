@@ -17,6 +17,7 @@ public class Usuario {
         this.cedula = cedula;
         this.nombre = nombre;
         this.alias = alias;
+        this.billetera = new Billetera();
     }
 
     public Usuario(String cedula, String nombre) {
@@ -39,4 +40,5 @@ public class Usuario {
     public String getNombre() {
         return nombre;
     }
+
 }

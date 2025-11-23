@@ -5,39 +5,41 @@ import java.time.format.DateTimeFormatter;
 
 public abstract class Transaccion {
     //atributos
-    protected double  monto;
+    protected double monto;
     protected String idTransaccion;
     private LocalDateTime fechaHora;
-    private Usuario usuario;
-    private int contadorID;
-    DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
-    String fechaFormateada = this.fechaHora.format(formato);
+    private DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
+    private String fechaFormateada;
+    protected Usuario usuario;
+    private static int contadorID; // es estatico porque no sera unico de cada instancia
+
     //Constructores
     public Transaccion(double monto, Usuario usuario) {
         this.monto = monto;
         this.usuario = usuario;
-    }
-
-    public Transaccion(Usuario usuario, double monto, LocalDateTime fechaHora) {
-        this.usuario = usuario;
-        this.monto = monto;
-        this.fechaHora = fechaHora;
+        this.fechaHora = LocalDateTime.now();
+        this.fechaFormateada = this.fechaHora.format(formato);
+        contadorID++;
+        this.idTransaccion = "TRX-" + contadorID;
     }
 
     public double getMonto() {
         return monto;
     }
+
     public void getInfoTransaccion(){
             System.out.println("Tipo: " + this.getClass().getSimpleName());
             System.out.println("ID Transacción: " + this.idTransaccion);
-            System.out.println("Fecha: " + this.fechaFormateada);
+        System.out.println("Fecha: " + fechaFormateada);
             System.out.println("Monto: $" + this.monto);
             if (this.usuario != null) {
-                System.out.println("Realizado por: " + this.usuario.getNombre());
+                System.out.println("Realizado por: " + this.usuario.getNombre() + "\n");
             }
         }
 
+    public void validarTransaccion(){ //va a ser aplicado polimorfismo en cada transaccion
+    }
 
-    public abstract boolean esIngreso();
+    public abstract boolean esIngreso(); // va a ser aplicada polimorfismo
 }
 
