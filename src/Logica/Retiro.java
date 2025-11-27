@@ -1,12 +1,17 @@
 package Logica;
 
 
+import Logica.Excepciones.SaldoInsuficienteException;
+
 //atributos
 public class Retiro extends Transaccion {
-
     //Constructor
     public Retiro(Usuario usuario, double monto) {
         super(monto, usuario);
+        validarTransaccion();
+
+        usuario.getBilletera().restarSaldo(monto);
+        usuario.getBilletera().agregarTransaccion(this);
     }
 
     @Override
@@ -18,5 +23,12 @@ public class Retiro extends Transaccion {
     public void getInfoTransaccion() {
         super.getInfoTransaccion();
         System.out.println("Retiro de fondos");
+    }
+
+    @Override
+    public void validarTransaccion() {
+        if (usuario.getBilletera().getSaldo() < monto) {
+            throw new SaldoInsuficienteException("Saldo insuficiente para retiro");
+        }
     }
 }
