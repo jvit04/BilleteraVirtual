@@ -1,45 +1,58 @@
 package Repositorios;
+
 import Logica.Excepciones.CredencialYaExistenteException;
 import Logica.Usuario;
 import Logica.Validador;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RepositorioUsuarios implements Repositorio{
-    private static List<Usuario> usuariosRegistrados=  new ArrayList<>();
+public class RepositorioUsuarios implements Repositorio {
+
+    // Clave: Cédula (String), Valor: Usuario
+    private static Map<String, Usuario> mapaUsuarios = new HashMap<>();
 
     public RepositorioUsuarios() {
     }
 
-    //Se encarga de guardar el usuario, no sin antes pasar por metodos y validación
     public static void guardarUsuario(Usuario nuevoUsuario) throws CredencialYaExistenteException {
-        Validador.validarUsuarioExistente(nuevoUsuario.getAlias()); //se dirige a la clase Validador con el throw
-        usuariosRegistrados.add(nuevoUsuario);
+        // 1. Validar que el alias no exista (recorriendo el mapa)
+        Validador.validarUsuarioExistente(nuevoUsuario.getAlias());
+
+        // 2. Validar que la cédula (la CLAVE) no exista ya
+        Validador.validarCedulaNoRegistrada(mapaUsuarios, nuevoUsuario);
+
+        // Si pasa las validaciones, lo metemos al mapa
+        mapaUsuarios.put(nuevoUsuario.getCedula(), nuevoUsuario);
     }
 
-    //metodo busca al usuario dentro del arreglo
-public static Usuario buscarPorAlias(String alias){
-        for (Usuario usuario:usuariosRegistrados){
-            if (usuario.getAlias().equals(alias)){
-                return  usuario;
+    // Búsqueda instantánea por cédula
+    public static Usuario buscarPorCedula(String cedula) {
+        return mapaUsuarios.get(cedula);
+    }
+
+    // Búsqueda por alias
+    public static Usuario buscarPorAlias(String alias) {
+        for (Usuario u : mapaUsuarios.values()) {
+            if (u.getAlias().equals(alias)) {
+                return u;
             }
         }
-        return null; // No encontrado
-}
+        return null;
+    }
 
-//compara si el retorno del metodo buscarPorAlias no es null, de eso depende que se guarde un usuario nuevo
     public static boolean existeAlias(String alias){
         return buscarPorAlias(alias) != null;
     }
 
-    //Permite obtener el listado de todos los usuarios registrados.
+    // Los valores del mapa se convierten a una lista para devolverlos todos
     public static List<Usuario> obtenerTodos() {
-        return usuariosRegistrados;
+        return new ArrayList<>(mapaUsuarios.values());
     }
-
 
     @Override
     public void cargarDesdeArchivo(String archivo) {
-        //aqui se registra usuarios desde archivo .csv
+        // Lógica futura...
     }
 }

@@ -17,8 +17,9 @@ public class Usuario {
     public Usuario(String cedula, LocalDate fechaNacimiento, String nombre, String ciudad, String alias, String email) {
         //Zona de validaciones
         Validador.validarCedula(cedula);
-        Validador.validarCorreo(email);
+        Validador.validarNombre(nombre);
         Validador.validarAlias(alias);
+        Validador.validarCorreo(email);
 
         this.cedula = cedula;
         this.fechaNacimiento = fechaNacimiento;
@@ -27,9 +28,27 @@ public class Usuario {
         this.alias = alias;
         this.email = email;
         this.billetera = new Billetera();
-
-
     }
+
+    public Usuario(String cedula, String nombre, String ciudad, String alias, String email) {
+        //Zona de validaciones
+        Validador.validarCedula(cedula);
+        Validador.validarNombre(nombre);
+        Validador.validarAlias(alias);
+        Validador.validarCorreo(email);
+        Validador.validarCiudad(ciudad);
+
+        // Inicialización
+        this.cedula = cedula;
+        this.nombre = nombre;
+        this.ciudad = ciudad;
+        this.alias = alias;
+        this.email = email;
+        this.fechaNacimiento = null;
+        this.billetera = new Billetera();
+    }
+
+
     //Getters
     public String getCedula() {
         return cedula;
@@ -42,9 +61,8 @@ public class Usuario {
     public Billetera getBilletera() {
         return billetera;
     }
+
     public String getNombre() {
         return nombre;
     }
-
 }
-

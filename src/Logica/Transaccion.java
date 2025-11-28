@@ -42,5 +42,13 @@ public abstract class Transaccion {
     }
 
     public abstract boolean esIngreso(); // va a ser aplicada polimorfismo
+
+    public String getIdTransaccion() {
+        return idTransaccion;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
 }
 

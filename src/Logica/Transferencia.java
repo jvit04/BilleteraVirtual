@@ -2,6 +2,7 @@ package Logica;
 
 public class Transferencia extends Transaccion {
     //atributos
+    //Para el futuro, se puede implementar una variable de monto maximo por transacción
     private Usuario usuarioDestino;
     private Usuario usuarioOrigen;
 

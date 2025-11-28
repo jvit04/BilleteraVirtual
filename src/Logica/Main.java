@@ -1,167 +1,296 @@
 package Logica;
 
-import Logica.Excepciones.OpcionMenuNoValidoException;
-import Logica.Excepciones.SaldoInsuficienteException;
-
+import Logica.Excepciones.*;
+import Repositorios.RepositorioUsuarios;
+import Repositorios.RepositorioTransacciones;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
-    // Escaner local para entradas de datos (Nombres, montos, etc.)
-    // Nota: Para elegir opciones de menú, usamos el Scanner interno de la clase Menu
     private static Scanner sc = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    private static final String[] OPCIONES_PRINCIPAL = {
+            "Registro de usuario",
+            "Consultas de usuario",
+            "Realizar transacción",
+            "Administrador (Repositorios)",
+            "Salir"
+    };
 
+    public static void main(String[] args) {
         boolean activo = true;
 
-        // Usuario base para pruebas
-       // Usuario usuarioActual = new Usuario("9999999999", "Usuario Prueba", "Tester");
-
-        System.out.println("Iniciando sistema...");
-
+        System.out.println("Iniciando sistema de Billetera Virtual...");
 
         while (activo) {
             try {
-                // 1. Mostrar el menú principal
-                mostrarMenuPrincipal();
+                // Se usa el Menu para mostrar las opciones visualmente iguales
+                Menu.mostrarOpciones("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
 
-                // 2. Pedir opción (Validamos que sea entre 1 y 5)
-                // Como Main está en el paquete Logica, puede acceder al método protected de Menu
-                int opcion = Menu.elegirOpcion(5);
+                // Se envia tamaño del arreglo dinámicamente
+                int opcion = Menu.elegirOpcion(OPCIONES_PRINCIPAL.length);
 
                 switch (opcion) {
-                    case 1: // Registro de usuario
+                    case 1: // --- REGISTRO DE USUARIO ---
                         System.out.println("\n--- Registro de Nuevo Usuario ---");
 
-                        System.out.print("Ingrese Cédula: ");
-                        String cedula = sc.next();
-                        sc.nextLine(); // Consumir resto de línea
+                        String cedula = "";
+                        boolean cancelarRegistro = false; // Bandera para saber si canceló
+
+                        while (true) {
+                            //
+                            System.out.print("Ingrese Cédula (o '0' para cancelar): ");
+                            cedula = sc.nextLine();
+
+                            if (cedula.equals("0")) {
+                                cancelarRegistro = true;
+                                break;
+                            }
+
+                            try {
+                                Validador.validarCedula(cedula); //
+                                if (RepositorioUsuarios.buscarPorCedula(cedula) != null) {
+                                    System.out.println("⚠ Error: Esa cédula ya está registrada.");
+                                    continue;
+                                }
+                                break; // Cédula válida y única, salimos del while
+                            } catch (CedulaInvalidaException e) {
+                                System.out.println("⚠ " + e.getMessage());
+                            }
+                        }
+
+                        if (cancelarRegistro) {
+                            System.out.println("Registro cancelado.");
+                            break; // Sale del case 1 y vuelve al menú principal
+                        }
 
                         System.out.print("Ingrese Nombre Completo: ");
                         String nombre = sc.nextLine();
+                        // 4. MEJORA: Validación extra para no permitir nombres vacíos
+                        while (nombre.trim().isEmpty()) {
+                            System.out.print("⚠ El nombre no puede estar vacío. Ingrese nuevamente: ");
+                            nombre = sc.nextLine();
+                        }
+
+                        System.out.print("Ingrese Ciudad: ");
+                        String ciudad = sc.nextLine();
 
                         System.out.print("Ingrese Alias: ");
                         String alias = sc.nextLine();
 
-                        usuarioActual = new Usuario(cedula, nombre, alias);
-                        System.out.println("¡Usuario " + usuarioActual.getNombre() + " registrado con éxito!");
+                        System.out.print("Ingrese Email: ");
+                        String email = sc.nextLine();
+
+                        try {
+                            Usuario usuarioActual = new Usuario(cedula, nombre, ciudad, alias, email); //
+                            RepositorioUsuarios.guardarUsuario(usuarioActual); //
+                            System.out.println("¡Bienvenido, " + usuarioActual.getNombre() + "! Has sido registrado exitosamente.");
+                        } catch (CredencialYaExistenteException e) {
+                            System.out.println("\n[!] Error: " + e.getMessage());
+                        }
                         break;
 
-                    case 2: // Consultas de usuario
+                    case 2: // --- CONSULTA DE SALDO ---
                         System.out.println("\n--- Consulta de Saldo ---");
-                        System.out.println("Usuario: " + usuarioActual.getNombre());
-                        usuarioActual.getBilletera().infoSaldo();
+                        System.out.print("Ingrese su número de Cédula para consultar: ");
+                        String cedulaConsulta = sc.nextLine();
+
+                        Usuario usuarioConsulta = RepositorioUsuarios.buscarPorCedula(cedulaConsulta);
+
+                        if (usuarioConsulta != null) {
+                            System.out.println("Hola, " + usuarioConsulta.getNombre());
+                            System.out.println("Alias: " + usuarioConsulta.getAlias());
+                            usuarioConsulta.getBilletera().infoSaldo(); //
+                        } else {
+                            System.out.println("⚠ Error: Usuario no encontrado.");
+                        }
                         break;
 
-                    case 3: // Realizar transacción
-                        // Ahora delegamos la lógica de MOSTRAR el menú a la clase MenuUsuario
-                        realizarTransaccionInteractiva(usuarioActual);
+                    case 3: // --- REALIZAR TRANSACCIÓN ---
+                        System.out.println("\n--- Realizar Transacción ---");
+                        System.out.print("Ingrese su Cédula para operar: ");
+                        String cedulaOperacion = sc.nextLine();
+
+                        Usuario usuarioOperacion = RepositorioUsuarios.buscarPorCedula(cedulaOperacion);
+
+                        if (usuarioOperacion != null) {
+                            System.out.println("Bienvenido/a " + usuarioOperacion.getNombre());
+                            realizarTransaccionInteractiva(usuarioOperacion);
+                        } else {
+                            System.out.println("⚠ Error: Usuario no encontrado.");
+                        }
                         break;
 
-                    case 4: // Menú Administrador
+                    case 4: // --- MENÚ ADMINISTRADOR ---
                         manejarMenuAdministrador();
                         break;
 
-                    case 5: // Salir
+                    case 5: // --- SALIR ---
                         System.out.println("Cerrando sesión... ¡Hasta luego!");
                         activo = false;
                         break;
-
-                    case -1:
-                        // Error de input controlado en Menu.java
-                        break;
                 }
 
-            } catch (OpcionMenuNoValidoException e) {
-                System.out.println("\n[!] Error de Menú: " + e.getMessage());
-            } catch (SaldoInsuficienteException e) {
-                System.out.println("\n[!] Error de Fondos: " + e.getMessage());
             } catch (Exception e) {
-                System.out.println("\n[!] Error inesperado: " + e.getMessage());
-                e.printStackTrace();
+                // Captura cualquier error inesperado para que el programa no se cierre de golpe
+                System.out.println("\n[!] Ocurrió un error inesperado: " + e.getMessage());
             }
         }
     }
 
     // --- MÉTODOS AUXILIARES ---
 
-    private static void mostrarMenuPrincipal() {
-        System.out.println("\n--- MENÚ PRINCIPAL ---");
-        System.out.println("1. Registro de usuario");
-        System.out.println("2. Consultas de usuario");
-        System.out.println("3. Realizar transacción");
-        System.out.println("4. Administrador (Repositorios)");
-        System.out.println("5. Salir");
-    }
-
     private static void realizarTransaccionInteractiva(Usuario usuario) {
-        // 1. Mostrar opciones usando el array de MenuUsuario
-        MenuUsuario.mostrar();
-
-        // 2. Pedir la opción validada automáticamente por MenuUsuario
+        // Muestra menú de depósito, retiro, etc.
+        MenuUsuario.mostrar(); //
         int tipo = MenuUsuario.pedirOpcion();
 
-        if (tipo == -1) return; // Si hubo error en la selección, salimos
+        if (tipo == -1) return; // Si hubo error en la selección, volvemos
 
-        double monto = 0;
-
-        // Pedimos el monto para todas las transacciones (1, 2, 3, 4)
-        // Nota: Si agregas una opción "Volver" en el futuro, ajusta este if
         System.out.print("Ingrese el monto a operar: $");
+        double monto;
         try {
-            monto = Double.parseDouble(sc.nextLine()); // Usar parseDouble es más seguro para evitar bugs de buffer
+            monto = Double.parseDouble(sc.nextLine());
+            if (monto <= 0) {
+                System.out.println("⚠ El monto debe ser mayor a 0.");
+                return;
+            }
         } catch (NumberFormatException e) {
-            System.out.println("Monto inválido. Cancelando operación.");
+            System.out.println("⚠ Monto inválido. Debe ser un número.");
             return;
         }
 
-        switch (tipo) {
-            case 1: // Depósito
-                Deposito deposito = new Deposito(monto, usuario);
-                deposito.getInfoTransaccion();
-                break;
+        try {
+            switch (tipo) {
+                case 1: // Depósito
+                    Deposito deposito = new Deposito(monto, usuario); //
+                    deposito.getInfoTransaccion();
+                    RepositorioTransacciones.guardarTransaccion(deposito); //
+                    System.out.println("✅ Depósito guardado en historial.");
+                    break;
 
-            case 2: // Retiro
-                Retiro retiro = new Retiro(usuario, monto);
-                retiro.getInfoTransaccion();
-                break;
+                case 2: // Retiro
+                    Retiro retiro = new Retiro(usuario, monto); //
+                    retiro.getInfoTransaccion();
+                    RepositorioTransacciones.guardarTransaccion(retiro);
+                    System.out.println("✅ Retiro guardado en historial.");
+                    break;
 
-            case 3: // Pago Servicio
-                System.out.print("Ingrese nombre de la empresa (ej. Luz, Agua): ");
-                String empresa = sc.nextLine();
-                System.out.print("Ingrese tipo de servicio: ");
-                String servicio = sc.nextLine();
+                case 3: // Pago Servicio
+                    System.out.print("Ingrese nombre de la empresa: ");
+                    String empresa = sc.nextLine();
+                    while(empresa.trim().isEmpty()){
+                        System.out.print("⚠ El nombre no puede estar vacío: ");
+                        empresa = sc.nextLine();
+                    }
 
-                PagoServicio pago = new PagoServicio(monto, usuario, empresa, servicio);
-                pago.getInfoTransaccion();
-                break;
+                    System.out.print("Ingrese tipo de servicio: ");
+                    String servicio = sc.nextLine();
+                    while(servicio.trim().isEmpty()){
+                        System.out.print("⚠ El servicio no puede estar vacío: ");
+                        servicio = sc.nextLine();
+                    }
 
-            case 4: // Transferencia
-                Usuario destino = new Usuario("0000000000", "Usuario Destino Genérico");
-                Transferencia transf = new Transferencia(monto, usuario, destino);
-                transf.getInfoTransaccion();
-                break;
+                    PagoServicio pago = new PagoServicio(monto, usuario, empresa, servicio); //
+                    pago.getInfoTransaccion();
+                    RepositorioTransacciones.guardarTransaccion(pago);
+                    System.out.println("✅ Pago guardado en historial.");
+                    break;
+
+                case 4: // Transferencia
+                    System.out.print("Ingrese el ALIAS del destinatario: ");
+                    String aliasDestino = sc.nextLine();
+
+                    // Validación: No permitir alias vacío
+                    if (aliasDestino.trim().isEmpty()) {
+                        System.out.println("❌ Error: El alias no puede estar vacío.");
+                        break;
+                    }
+
+                    Usuario destino = RepositorioUsuarios.buscarPorAlias(aliasDestino);
+
+                    if (destino == null) {
+                        System.out.println("❌ Error: El alias '" + aliasDestino + "' no existe.");
+                    } else if (destino.getCedula().equals(usuario.getCedula())) {
+                        System.out.println("❌ Error: No puedes transferirte a ti mismo.");
+                    } else {
+                        Transferencia transf = new Transferencia(monto, usuario, destino); //
+                        transf.getInfoTransaccion();
+                        RepositorioTransacciones.guardarTransaccion(transf);
+                        System.out.println("✅ Transferencia exitosa.");
+                    }
+                    break;
+            }
+        } catch (SaldoInsuficienteException | MontoInvalidoException e) { //
+            System.out.println("\n[!] No se pudo realizar la transacción: " + e.getMessage());
         }
     }
 
     private static void manejarMenuAdministrador() {
-        MenuAdministrador.mostrar();
-        int opAdmin = MenuAdministrador.pedirOpcion();
+        int opAdmin;
+        do {
+            // Muestra el menú con las nuevas opciones
+            MenuAdministrador.mostrar();
+            opAdmin = MenuAdministrador.pedirOpcion();
 
-        switch (opAdmin) {
-            case 1:
-                System.out.println("Consultando repositorio de usuarios... (Pendiente)");
-                break;
-            case 2:
-                System.out.println("Consultando transacciones... (Pendiente)");
-                break;
-            case 3:
-                System.out.println("Realizando búsqueda específica... (Pendiente)");
-                break;
-            case 4:
-                System.out.println("Volviendo al menú principal...");
-                break;
-        }
+            switch (opAdmin) {
+                case 1: // --- CONSULTAR REPOSITORIO DE USUARIOS ---
+                    List<Usuario> usuarios = RepositorioUsuarios.obtenerTodos();
+                    System.out.println("\n--- Repositorio de Usuarios (" + usuarios.size() + ") ---");
+                    if (usuarios.isEmpty()) {
+                        System.out.println("(El repositorio está vacío)");
+                    } else {
+                        for (Usuario u : usuarios) {
+                            System.out.println("- " + u.getNombre() + " | Alias: " + u.getAlias() + " | C.I: " + u.getCedula());
+                        }
+                    }
+                    break;
+
+                case 2: // --- CONSULTAR REPOSITORIO DE TRANSACCIONES (Buscar una específica) ---
+                    System.out.print("Ingrese el ID de la transacción a buscar (ej. TRX-1): ");
+                    String idBuscar = sc.nextLine();
+                    Transaccion tEncontrada = RepositorioTransacciones.buscarPorID(idBuscar);
+
+                    if (tEncontrada != null) {
+                        System.out.println("\n--- Detalle de Transacción ---");
+                        tEncontrada.getInfoTransaccion();
+                    } else {
+                        System.out.println("⚠ No se encontró ninguna transacción con el ID: " + idBuscar);
+                    }
+                    break;
+
+                case 3: // --- VER TRANSACCIONES TOTALES (Historial completo) ---
+                    List<Transaccion> historial = RepositorioTransacciones.obtenerHistorialGlobal();
+                    System.out.println("\n--- Historial Global de Transacciones (" + historial.size() + ") ---");
+                    if (historial.isEmpty()) {
+                        System.out.println("(No hay transacciones registradas)");
+                    } else {
+                        for (Transaccion t : historial) {
+                            // Mostramos un resumen rápido
+                            System.out.println("- " + t.getIdTransaccion() + " | $" + t.getMonto() + " | Tipo: " + t.getClass().getSimpleName());
+                        }
+                    }
+                    break;
+
+                case 4: // --- CARGAR DESDE ARCHIVO --- aun en proceso, no se ha hecho
+                    System.out.println("\n--- Carga de Datos ---");
+                    System.out.print("Ingrese el nombre del archivo de usuarios: ");
+                    String archivoUsuarios = sc.nextLine();
+
+
+                    new RepositorioUsuarios().cargarDesdeArchivo(archivoUsuarios);
+                    System.out.println("ℹ Llamada a carga de usuarios realizada (Revisar implementación en RepositorioUsuarios).");
+
+
+                    System.out.println("ℹ La carga de transacciones se realizaría de forma similar.");
+                    break;
+
+                case 5: // --- VOLVER ---
+                    System.out.println("Volviendo al menú principal...");
+                    break;
+            }
+        } while (opAdmin != 5);
     }
+
 }
