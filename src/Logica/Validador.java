@@ -1,5 +1,6 @@
 package Logica;
 import Logica.Excepciones.*;
+import Repositorios.RepositorioUsuarios;
 
 import java.util.regex.Pattern;
 
@@ -41,9 +42,11 @@ public static void validarTransaccion(Usuario usuario, double monto){
         throw new SaldoInsuficienteException("Saldo insuficiente para retiro");
     }
 }
-/* Aqui va la excepcion de validar el usuario existente
-public static void validarUsuarioExistente(Usuario usuario){
-        if ()
+//Aqui va la excepcion de validar el usuario existente
+public static void validarUsuarioExistente(String alias){
+        if (RepositorioUsuarios.existeAlias(alias)){ //lanza el throw una vez se confirme la condición como falsa
+            throw new CredencialYaExistenteException("El alias " + alias + " ya está en uso.");
+        }
 }
-*/
+
 }
