@@ -88,7 +88,7 @@ public class Validador {
     //sirve para validar que una transacción sea realizable
     public static void validarTransaccion(Usuario usuario, double monto) throws SaldoInsuficienteException {
         if (usuario.getBilletera().getSaldo() < monto) {
-            throw new SaldoInsuficienteException("Saldo insuficiente para retiro");
+            throw new SaldoInsuficienteException("Saldo insuficiente para la transacción");
         }
     }
 

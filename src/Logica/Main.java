@@ -20,8 +20,10 @@ public class Main {
 
     public static void main(String[] args) {
         boolean activo = true;
-
+        boolean campoValido = false;
         System.out.println("Iniciando sistema de Billetera Virtual...");
+
+        cargarDatosDePrueba();
 
         while (activo) {
             try {
@@ -38,7 +40,7 @@ public class Main {
                         String cedula = "";
                         boolean cancelarRegistro = false; // Bandera para saber si canceló
 
-                        while (true) {
+
                             //
                             System.out.print("Ingrese Cédula (o '0' para cancelar): ");
                             cedula = sc.nextLine();
@@ -47,6 +49,7 @@ public class Main {
                                 cancelarRegistro = true;
                                 break;
                             }
+
 
                             try {
                                 Validador.validarCedula(cedula); //
@@ -58,7 +61,8 @@ public class Main {
                             } catch (CedulaInvalidaException e) {
                                 System.out.println("⚠ " + e.getMessage());
                             }
-                        }
+
+
 
                         if (cancelarRegistro) {
                             System.out.println("Registro cancelado.");
@@ -178,6 +182,14 @@ public class Main {
                     break;
 
                 case 3: // Pago Servicio
+                    System.out.print("Ingrese tipo de servicio: ");
+                    String servicio = sc.nextLine();
+                    while(servicio.trim().isEmpty()){
+                        System.out.print("⚠ El servicio no puede estar vacío: ");
+                        servicio = sc.nextLine();
+                    }
+
+
                     System.out.print("Ingrese nombre de la empresa: ");
                     String empresa = sc.nextLine();
                     while(empresa.trim().isEmpty()){
@@ -185,12 +197,6 @@ public class Main {
                         empresa = sc.nextLine();
                     }
 
-                    System.out.print("Ingrese tipo de servicio: ");
-                    String servicio = sc.nextLine();
-                    while(servicio.trim().isEmpty()){
-                        System.out.print("⚠ El servicio no puede estar vacío: ");
-                        servicio = sc.nextLine();
-                    }
 
                     PagoServicio pago = new PagoServicio(monto, usuario, empresa, servicio); //
                     pago.getInfoTransaccion();
@@ -292,5 +298,42 @@ public class Main {
             }
         } while (opAdmin != 5);
     }
+    // Agrega esto al final de la clase Main, junto a los otros métodos privados
+    private static void cargarDatosDePrueba() {
+        System.out.println("--- Cargando datos de prueba... ---");
+        try {
+            // 1. Crear y registrar Usuarios
+            // Recuerda usar datos que pasen tus validaciones (cédula 10 dígitos, emails válidos, etc.)
+            Usuario u1 = new Usuario("1111111111", "José Viteri", "Quito", "jose04", "jviteri@2004gmail.com");
+            Usuario u2 = new Usuario("2222222222", "Paula Martillo", "Guayaquil", "pau123", "pau123@gmail.com");
+            Usuario u3 = new Usuario("3333333333", "Rafael Brito", "Cuenca", "rbrito42", "rbrito@hotmail.com");
 
+            RepositorioUsuarios.guardarUsuario(u1);
+            RepositorioUsuarios.guardarUsuario(u2);
+            RepositorioUsuarios.guardarUsuario(u3);
+
+            // 2. Crear Transacciones iniciales (para que tengan saldo y movimiento)
+
+            // Depósitos iniciales (fondos)
+            Deposito d1 = new Deposito(500.00, u1); // Ana empieza con $500
+            RepositorioTransacciones.guardarTransaccion(d1);
+
+            Deposito d2 = new Deposito(1000.00, u2); // Beto empieza con $1000
+            RepositorioTransacciones.guardarTransaccion(d2);
+
+            // Un retiro de Ana
+            Retiro r1 = new Retiro(u1, 50.00);
+            RepositorioTransacciones.guardarTransaccion(r1);
+
+            // Una transferencia de Beto a Ana
+            Transferencia t1 = new Transferencia(200.00, u2, u1);
+            RepositorioTransacciones.guardarTransaccion(t1);
+
+            System.out.println("✅ Datos de prueba cargados: 3 usuarios y 4 transacciones.");
+
+        } catch (Exception e) {
+            System.out.println("⚠ Error al cargar datos de prueba: " + e.getMessage());
+        }
+        System.out.println("-----------------------------------\n");
+    }
 }
