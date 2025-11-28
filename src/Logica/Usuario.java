@@ -17,7 +17,7 @@ public class Usuario {
     public Usuario(String cedula, LocalDate fechaNacimiento, String nombre, String ciudad, String alias, String email) {
         //Zona de validaciones
         Validador.validarCedula(cedula);
-        Validador.validarNombre(nombre);
+        Validador.validarNombreCampo(nombre);
         Validador.validarAlias(alias);
         Validador.validarCorreo(email);
 
@@ -32,11 +32,11 @@ public class Usuario {
 
     public Usuario(String cedula, String nombre, String ciudad, String alias, String email) {
         //Zona de validaciones
-        Validador.validarCedula(cedula);
-        Validador.validarNombre(nombre);
-        Validador.validarAlias(alias);
-        Validador.validarCorreo(email);
-        Validador.validarCiudad(ciudad);
+//        Validador.validarCedula(cedula);
+//        Validador.validarNombreCampo(nombre);
+//        Validador.validarAlias(alias);
+//        Validador.validarCorreo(email);
+//        Validador.validarCiudad(ciudad);
 
         // Inicialización
         this.cedula = cedula;

@@ -11,6 +11,7 @@ private List<Transaccion> transacciones;
     public Billetera() {this.saldo = 0;
     transacciones = new ArrayList<>();} // si no ingresa un monto, entonces empieza con 0
 
+
     public Billetera(double saldo) {
         Validador.validarMonto(saldo); //verifica que no se haya introducido un saldo negativo.
         this.saldo = saldo;

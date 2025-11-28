@@ -12,7 +12,7 @@ public class RepositorioTransacciones implements Repositorio {
     private static Map<String, Transaccion> mapaTransacciones = new HashMap<>();
 
     public static void guardarTransaccion(Transaccion t) {
-        // Usamos el ID como clave. ¡Asegúrate de haber agregado el getter en Transaccion.java!
+        // Usa el ID como clave.
         mapaTransacciones.put(t.getIdTransaccion(), t);
     }
 

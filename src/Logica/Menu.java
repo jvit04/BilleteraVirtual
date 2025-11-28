@@ -30,8 +30,8 @@ public abstract class Menu {
             // Leemos texto para evitar errores de buffer
             int opcion = Integer.parseInt(sc.nextLine());
 
-            // AQUÍ ESTÁ TU LÓGICA: Validar usando el tamaño del array
-    Validador.validarOpcion(opcion,cantidadOpciones);
+            // Validar usando el tamaño del array
+        Validador.validarOpcion(opcion,cantidadOpciones);
             return opcion;
 
         } catch (NumberFormatException e) {

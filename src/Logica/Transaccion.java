@@ -41,7 +41,7 @@ public abstract class Transaccion {
     public void validarTransaccion(){ //va a ser aplicado polimorfismo en cada transaccion
     }
 
-    public abstract boolean esIngreso(); // va a ser aplicada polimorfismo
+    //public abstract boolean esIngreso(); // va a ser aplicada polimorfismo
 
     public String getIdTransaccion() {
         return idTransaccion;

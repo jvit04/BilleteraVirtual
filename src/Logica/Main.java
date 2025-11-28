@@ -6,6 +6,7 @@ import Repositorios.RepositorioTransacciones;
 import java.util.List;
 import java.util.Scanner;
 
+//Para ejecutar el programa desde terminal usar: java -cp bin Logica.Main
 public class Main {
 
     private static Scanner sc = new Scanner(System.in);
@@ -20,12 +21,13 @@ public class Main {
 
     public static void main(String[] args) {
         boolean activo = true;
-        boolean campoValido = false;
+
         System.out.println("Iniciando sistema de Billetera Virtual...");
 
         cargarDatosDePrueba();
 
         while (activo) {
+            limpiarPantalla();
             try {
                 // Se usa el Menu para mostrar las opciones visualmente iguales
                 Menu.mostrarOpciones("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
@@ -41,50 +43,81 @@ public class Main {
                         boolean cancelarRegistro = false; // Bandera para saber si canceló
 
 
-                            //
-                            System.out.print("Ingrese Cédula (o '0' para cancelar): ");
-                            cedula = sc.nextLine();
+                            while(true) {
+                                System.out.print("Ingrese Cédula (o '0' para cancelar): ");
+                                cedula = sc.nextLine();
 
-                            if (cedula.equals("0")) {
-                                cancelarRegistro = true;
-                                break;
-                            }
-
-
-                            try {
-                                Validador.validarCedula(cedula); //
-                                if (RepositorioUsuarios.buscarPorCedula(cedula) != null) {
-                                    System.out.println("⚠ Error: Esa cédula ya está registrada.");
-                                    continue;
+                                if (cedula.equals("0")) {
+                                    cancelarRegistro = true;
+                                    break;
                                 }
-                                break; // Cédula válida y única, salimos del while
-                            } catch (CedulaInvalidaException e) {
-                                System.out.println("⚠ " + e.getMessage());
+
+                                try {
+                                    Validador.validarCedula(cedula); //
+                                    if (RepositorioUsuarios.buscarPorCedula(cedula) != null) {
+                                        System.out.println("⚠ Error: Esa cédula ya está registrada.");
+                                        continue;
+                                    }
+                                    break;
+                                } catch (CedulaInvalidaException e) {
+                                    System.out.println("⚠ " + e.getMessage());
+                                }
                             }
-
-
 
                         if (cancelarRegistro) {
                             System.out.println("Registro cancelado.");
                             break; // Sale del case 1 y vuelve al menú principal
                         }
 
-                        System.out.print("Ingrese Nombre Completo: ");
-                        String nombre = sc.nextLine();
-                        // 4. MEJORA: Validación extra para no permitir nombres vacíos
-                        while (nombre.trim().isEmpty()) {
-                            System.out.print("⚠ El nombre no puede estar vacío. Ingrese nuevamente: ");
-                            nombre = sc.nextLine();
+                        String nombre;
+                        while (true) {
+                            try {
+                                System.out.print("Ingrese Nombre Completo: ");
+                                nombre = sc.nextLine();
+                                Validador.validarNombreCampo(nombre);
+                                break;
+                            } catch (IllegalArgumentException e) {
+                                System.out.println("⚠ " + e.getMessage());
+                            }
+                        }
+                        String ciudad;
+                        while (true) {
+                            try {
+                                System.out.print("Ingrese Ciudad: ");
+                                ciudad = sc.nextLine();
+                                Validador.validarNombreCampo(ciudad);
+                                break;
+                            } catch (IllegalArgumentException e) {
+                                System.out.println("⚠ " + e.getMessage());
+                            }
                         }
 
-                        System.out.print("Ingrese Ciudad: ");
-                        String ciudad = sc.nextLine();
+                        String alias;
+                        while (true){
+                            try {
+                                System.out.print("Ingrese Alias: ");
+                                alias = sc.nextLine();
+                                Validador.validarAlias(alias);
+                                break;
+                            }
+                            catch (AliasInvalidoException e){
+                                System.out.println("⚠ " + e.getMessage());
+                            }
+                        }
 
-                        System.out.print("Ingrese Alias: ");
-                        String alias = sc.nextLine();
 
-                        System.out.print("Ingrese Email: ");
-                        String email = sc.nextLine();
+                        String email;
+                        while (true){
+                            try {
+                                System.out.print("Ingrese Email: ");
+                                email = sc.nextLine();
+                                Validador.validarCorreo(email);
+                                break;
+                            }
+                            catch (EmailNoValidoException e){
+                                System.out.println("⚠ " + e.getMessage());
+                            }
+                        }
 
                         try {
                             Usuario usuarioActual = new Usuario(cedula, nombre, ciudad, alias, email); //
@@ -97,17 +130,30 @@ public class Main {
 
                     case 2: // --- CONSULTA DE SALDO ---
                         System.out.println("\n--- Consulta de Saldo ---");
-                        System.out.print("Ingrese su número de Cédula para consultar: ");
-                        String cedulaConsulta = sc.nextLine();
 
-                        Usuario usuarioConsulta = RepositorioUsuarios.buscarPorCedula(cedulaConsulta);
+                        String cedulaConsulta;
+                        while(true) {
+                            //Para hacer que se pueda consultar por alias habría que hacer un hashmap con alias, usuario.
+                            System.out.print("Ingrese Cédula: ");
+                            cedulaConsulta = sc.nextLine();
+                            try {
+                                Validador.validarCedula(cedulaConsulta);
 
-                        if (usuarioConsulta != null) {
-                            System.out.println("Hola, " + usuarioConsulta.getNombre());
-                            System.out.println("Alias: " + usuarioConsulta.getAlias());
-                            usuarioConsulta.getBilletera().infoSaldo(); //
-                        } else {
-                            System.out.println("⚠ Error: Usuario no encontrado.");
+                            } catch (CedulaInvalidaException e) {
+                                System.out.println("⚠ " + e.getMessage());
+                            }
+
+                            Usuario usuarioConsulta = RepositorioUsuarios.buscarPorCedula(cedulaConsulta);
+
+                            if (usuarioConsulta != null) {
+                                System.out.println("Hola, " + usuarioConsulta.getNombre());
+                                System.out.println("Alias: " + usuarioConsulta.getAlias());
+                                usuarioConsulta.getBilletera().infoSaldo(); //
+                                break;
+                            } else {
+                                System.out.println("⚠ Error: Usuario no encontrado.");
+                            }
+
                         }
                         break;
 
@@ -335,5 +381,9 @@ public class Main {
             System.out.println("⚠ Error al cargar datos de prueba: " + e.getMessage());
         }
         System.out.println("-----------------------------------\n");
+    }
+    public static void limpiarPantalla() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 }

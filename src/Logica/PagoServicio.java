@@ -17,10 +17,10 @@ public class PagoServicio extends Transaccion {
         usuario.getBilletera().agregarTransaccion(this);
     }
 
-    @Override
-    public boolean esIngreso() {
-        return false;
-    }
+//    @Override
+//    public boolean esIngreso() {
+//        return false;
+//    }
 
     @Override
     public void validarTransaccion() {

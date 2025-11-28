@@ -21,11 +21,11 @@ public class Transferencia extends Transaccion {
         usuarioDestino.getBilletera().agregarTransaccion(this);
     }
 
-
-    @Override
-    public boolean esIngreso() {
-        return false;
-    }
+//
+//    @Override
+//    public boolean esIngreso() {
+//        return false;
+//    }
 
     @Override
     public void validarTransaccion() {

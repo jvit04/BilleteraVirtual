@@ -2,7 +2,6 @@ package Logica;
 import Logica.Excepciones.*;
 import Repositorios.RepositorioUsuarios;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -43,25 +42,20 @@ public class Validador {
         }
 
         // 1. Validar que sean solo números
-        if (!cedula.matches("[0-9]+")) {
-            throw new CedulaInvalidaException("La cédula debe contener solo números.");
-        }
-
-        // 2. Validar longitud exacta (Aquí arreglamos tu queja)
-        if (cedula.length() != 10) {
-            throw new CedulaInvalidaException("La cédula debe tener exactamente 10 dígitos.");
+        if (!Pattern.matches(CEDULA_REGEX,cedula)) {
+            throw new CedulaInvalidaException("La cédula debe contener 10 dígitos y solo números.");
         }
 
     }
 
     //metodo estatico que valida el nombre
-    public static void validarNombre(String nombre) {
+    public static void validarNombreCampo(String nombre) {
         if (nombre == null || nombre.trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre es obligatorio");
+            throw new IllegalArgumentException("Este campo es obligatorio");
         }
             for (char c : nombre.toCharArray()) {
                 if (Character.isDigit(c)) {
-                    throw new IllegalArgumentException("No se permiten numeros en el nombre"); // Found a digit
+                    throw new IllegalArgumentException("No se permiten numeros en este campo"); // Encuentra un digito
                 }
             }
         }
