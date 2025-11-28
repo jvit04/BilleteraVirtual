@@ -27,9 +27,7 @@ public class PagoServicio extends Transaccion {
 
     @Override
     public void validarTransaccion() {
-        if (usuario.getBilletera().getSaldo() < monto) {
-            throw new SaldoInsuficienteException("Saldo insuficiente para pagar el servicio " + tipoServicio);
-        }
+    Validador.validarTransaccion(this.usuario,this.monto);
     }
 
     @Override

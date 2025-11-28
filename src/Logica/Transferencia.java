@@ -30,8 +30,7 @@ public class Transferencia extends Transaccion {
 
     @Override
     public void validarTransaccion() {
-        if (usuarioOrigen.getBilletera().getSaldo() < monto){
-        throw new SaldoInsuficienteException("Saldo insuficiente del usuario transfiriente");}
+      Validador.validarTransaccion(this.usuarioOrigen,this.monto);
     }
 
     @Override

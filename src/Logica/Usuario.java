@@ -13,6 +13,26 @@ public class Usuario {
     private Billetera billetera;
 
     //Constructores
+
+    public Usuario(String cedula, LocalDate fechaNacimiento, String nombre, String ciudad, String alias, String email) {
+        //Zona de validaciones
+        Validador.validarCedula(cedula);
+        Validador.validarCorreo(email);
+        Validador.validarAlias(alias);
+
+        this.cedula = cedula;
+        this.fechaNacimiento = fechaNacimiento;
+        this.nombre = nombre;
+        this.ciudad = ciudad;
+        this.alias = alias;
+        this.email = email;
+        this.billetera = new Billetera();
+
+
+    }
+/* Nota:  Verificar la utilidad de estos constructores, realmente es conveniente tener a los usuarios registrados solo
+ciertos datos?
+
     public Usuario(String cedula, String nombre, String alias) {
         this.cedula = cedula;
         this.nombre = nombre;
@@ -24,7 +44,7 @@ public class Usuario {
         this.cedula = cedula;
         this.nombre = nombre;
     }
-
+*/
     //Getters
     public String getCedula() {
         return cedula;
@@ -42,3 +62,4 @@ public class Usuario {
     }
 
 }
+

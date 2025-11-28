@@ -27,8 +27,6 @@ public class Retiro extends Transaccion {
 
     @Override
     public void validarTransaccion() {
-        if (usuario.getBilletera().getSaldo() < monto) {
-            throw new SaldoInsuficienteException("Saldo insuficiente para retiro");
-        }
+    Validador.validarTransaccion(this.usuario, this.monto);
     }
 }
