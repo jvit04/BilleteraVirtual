@@ -1,5 +1,4 @@
 package Repositorios;
-
 import Logica.Excepciones.CredencialYaExistenteException;
 import Logica.Usuario;
 import Logica.Validador;

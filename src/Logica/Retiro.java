@@ -1,15 +1,12 @@
 package Logica;
 
-
-import Logica.Excepciones.SaldoInsuficienteException;
-
 //atributos
 public class Retiro extends Transaccion {
     //Constructor
     public Retiro(Usuario usuario, double monto) {
         super(monto, usuario);
+        //Se llama el metodo de validar la transacción antes de efectuar el Retiro
         validarTransaccion();
-
         usuario.getBilletera().restarSaldo(monto);
         usuario.getBilletera().agregarTransaccion(this);
     }
@@ -20,6 +17,7 @@ public class Retiro extends Transaccion {
     }
 
     @Override
+    //Devuelve la información de la transacción sobrescribiendo el metodo de la clase padre
     public void getInfoTransaccion() {
         super.getInfoTransaccion();
         System.out.println("Retiro de fondos");
@@ -27,6 +25,7 @@ public class Retiro extends Transaccion {
 
     @Override
     public void validarTransaccion() {
-    Validador.validarTransaccion(this.usuario, this.monto);
+        Validador.validarMonto(this.monto); //Valida que el usuario no haya puesto un retiro con un numero negativo
+        Validador.validarTransaccion(this.usuario, this.monto); //Valida que el usuario tenga el saldo suficiente para retirar
     }
 }

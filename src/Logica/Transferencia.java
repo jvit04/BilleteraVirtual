@@ -1,7 +1,5 @@
 package Logica;
 
-import Logica.Excepciones.SaldoInsuficienteException;
-
 public class Transferencia extends Transaccion {
     //atributos
     private Usuario usuarioDestino;
@@ -30,10 +28,12 @@ public class Transferencia extends Transaccion {
 
     @Override
     public void validarTransaccion() {
-      Validador.validarTransaccion(this.usuarioOrigen,this.monto);
+        Validador.validarMonto(this.monto);//Verfica si el monto no es negativo o cero.
+      Validador.validarTransaccion(this.usuarioOrigen,this.monto); //Verifica si existe el saldo para realizar la transferencia
     }
 
     @Override
+    //Devuelve la información de la transacción sobrescribiendo el metodo de la clase padre
     public void getInfoTransaccion() {
         super.getInfoTransaccion();
         System.out.println("\nTransferencia realizada a: " + this.usuarioDestino.getNombre() + " de: " + this.usuarioOrigen.getNombre());

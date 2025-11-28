@@ -30,21 +30,6 @@ public class Usuario {
 
 
     }
-/* Nota:  Verificar la utilidad de estos constructores, realmente es conveniente tener a los usuarios registrados solo
-ciertos datos?
-
-    public Usuario(String cedula, String nombre, String alias) {
-        this.cedula = cedula;
-        this.nombre = nombre;
-        this.alias = alias;
-        this.billetera = new Billetera();
-    }
-
-    public Usuario(String cedula, String nombre) {
-        this.cedula = cedula;
-        this.nombre = nombre;
-    }
-*/
     //Getters
     public String getCedula() {
         return cedula;

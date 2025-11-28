@@ -1,8 +1,5 @@
 package Logica;
 
-import Logica.Excepciones.SaldoInsuficienteException;
-
-import java.util.Scanner;
 
 public class PagoServicio extends Transaccion {
     //atributos

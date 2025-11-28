@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 public abstract class Transaccion {
     //atributos
+    //private static final double  MAX_MONTO_TRANSACCION = 10000.00;  Se puede considerar implementar un monto maximo por transacción en el futuro
     protected double monto;
     protected String idTransaccion;
     private LocalDateTime fechaHora;

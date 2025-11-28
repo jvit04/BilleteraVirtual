@@ -1,7 +1,6 @@
 package Repositorios;
-import java.util.List;
 
-public interface Repositorio<T> {
+public interface Repositorio {
     // cargar datos desde un archivo
     public void cargarDesdeArchivo(String archivo); // recibiria la ruta del archivo
 
