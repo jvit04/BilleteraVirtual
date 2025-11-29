@@ -10,6 +10,7 @@ public class Validador {
     private static final String EMAIL_REGEX = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     private static final String ALIAS_REGEX = "^[a-zA-Z0-9._]{5,15}$";
     private static final String CEDULA_REGEX = "^[0-9]{10}$";
+    private static final String NOMBRE_REGEX = "^[A-Za-zÁÉÍÓÚáéíóúñÑüÜ\\s]+$";
 
     public Validador() {
     }
@@ -53,11 +54,9 @@ public class Validador {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new IllegalArgumentException("Este campo es obligatorio");
         }
-            for (char c : nombre.toCharArray()) {
-                if (Character.isDigit(c)) {
-                    throw new IllegalArgumentException("No se permiten numeros en este campo"); // Encuentra un digito
-                }
-            }
+        if (!Pattern.matches(NOMBRE_REGEX,nombre) ) {
+            throw new IllegalArgumentException("caracteres invalidos en el campo"); // Siga un patron regex
+        }
         }
 
     public static void validarCiudad(String nombre) {

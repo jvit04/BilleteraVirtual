@@ -12,6 +12,7 @@ public abstract class Menu {
      * @param OPCIONES El array de Strings con las opciones
      */
     protected static void mostrarOpciones(String titulo, String[] OPCIONES) {
+
         System.out.println("\n--- " + titulo + " ---");
         for (int i = 0; i < OPCIONES.length; i++) {
             // Imprime "1. Opción", "2. Opción", etc.

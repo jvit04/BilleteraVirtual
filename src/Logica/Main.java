@@ -155,20 +155,32 @@ public class Main {
                             }
 
                         }
+
                         break;
 
                     case 3: // --- REALIZAR TRANSACCIÓN ---
                         System.out.println("\n--- Realizar Transacción ---");
+                        while(true) {
+
+                        String cedulaOperacion;
                         System.out.print("Ingrese su Cédula para operar: ");
-                        String cedulaOperacion = sc.nextLine();
+                        cedulaOperacion = sc.nextLine();
+                            try {
+                                Validador.validarCedula(cedulaOperacion);
+
+                            } catch (CedulaInvalidaException e) {
+                                System.out.println("⚠ " + e.getMessage());
+                            }
 
                         Usuario usuarioOperacion = RepositorioUsuarios.buscarPorCedula(cedulaOperacion);
 
                         if (usuarioOperacion != null) {
                             System.out.println("Bienvenido/a " + usuarioOperacion.getNombre());
                             realizarTransaccionInteractiva(usuarioOperacion);
+                            break;
                         } else {
                             System.out.println("⚠ Error: Usuario no encontrado.");
+                        }
                         }
                         break;
 
@@ -198,17 +210,24 @@ public class Main {
 
         if (tipo == -1) return; // Si hubo error en la selección, volvemos
 
-        System.out.print("Ingrese el monto a operar: $");
         double monto;
-        try {
-            monto = Double.parseDouble(sc.nextLine());
-            if (monto <= 0) {
-                System.out.println("⚠ El monto debe ser mayor a 0.");
-                return;
+        while (true) {
+            System.out.print("Ingrese el monto a operar: $");
+            try {
+                monto = Double.parseDouble(sc.nextLine());
+                Validador.validarMonto(monto);
+                Validador.validarTransaccion(usuario,monto);
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("⚠ Monto inválido. Debe ser un número.");
+            } catch (MontoInvalidoException e) {
+                System.out.println("⚠ Monto inválido. No acepta negativos ni cero.");
             }
-        } catch (NumberFormatException e) {
-            System.out.println("⚠ Monto inválido. Debe ser un número.");
-            return;
+//            catch (SaldoInsuficienteException e){
+//                System.out.println(e.getMessage());
+//            }
+            //Nota: no es recomendable hacer el catch de saldo insuficiente con transacción que resten saldo,
+            //debido a que si un usuario tiene $0 lo deja en un bucle infinito.
         }
 
         try {
@@ -228,16 +247,30 @@ public class Main {
                     break;
 
                 case 3: // Pago Servicio
-                    System.out.print("Ingrese tipo de servicio: ");
-                    String servicio = sc.nextLine();
-                    while(servicio.trim().isEmpty()){
-                        System.out.print("⚠ El servicio no puede estar vacío: ");
-                        servicio = sc.nextLine();
+                    String servicio = "";
+                    while (true) {
+                        System.out.print("Ingrese tipo de servicio: ");
+                        try {
+                            servicio = sc.nextLine();
+                            Validador.validarNombreCampo(servicio);
+                            break;
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Servicio invalido, intente nuevamente.");
+                        }
+
+                    }
+                    String empresa = "";
+                    while (true) {
+                        System.out.print("Ingrese nombre de la empresa: ");
+                        try {
+                            empresa = sc.nextLine();
+                            Validador.validarNombreCampo(empresa);
+                            break;
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Nombre de empresa invalido, intente nuevamente.");
+                        }
                     }
 
-
-                    System.out.print("Ingrese nombre de la empresa: ");
-                    String empresa = sc.nextLine();
                     while(empresa.trim().isEmpty()){
                         System.out.print("⚠ El nombre no puede estar vacío: ");
                         empresa = sc.nextLine();
@@ -251,26 +284,31 @@ public class Main {
                     break;
 
                 case 4: // Transferencia
-                    System.out.print("Ingrese el ALIAS del destinatario: ");
-                    String aliasDestino = sc.nextLine();
+                    String aliasDestino = "";
+                    while (true) {
+                        try {
 
-                    // Validación: No permitir alias vacío
-                    if (aliasDestino.trim().isEmpty()) {
-                        System.out.println("❌ Error: El alias no puede estar vacío.");
-                        break;
-                    }
+                            System.out.print("Ingrese el ALIAS del destinatario: ");
+                            aliasDestino = sc.nextLine();
+                            Validador.validarAlias(aliasDestino);
+                        } catch (AliasInvalidoException e) {
+                            System.out.println("Alias invalido, intente nuevamente.");
+                        }
 
-                    Usuario destino = RepositorioUsuarios.buscarPorAlias(aliasDestino);
 
-                    if (destino == null) {
-                        System.out.println("❌ Error: El alias '" + aliasDestino + "' no existe.");
-                    } else if (destino.getCedula().equals(usuario.getCedula())) {
-                        System.out.println("❌ Error: No puedes transferirte a ti mismo.");
-                    } else {
-                        Transferencia transf = new Transferencia(monto, usuario, destino); //
-                        transf.getInfoTransaccion();
-                        RepositorioTransacciones.guardarTransaccion(transf);
-                        System.out.println("✅ Transferencia exitosa.");
+                        Usuario destino = RepositorioUsuarios.buscarPorAlias(aliasDestino);
+
+                        if (destino == null) {
+                            System.out.println("❌ Error: El alias '" + aliasDestino + "' no existe.");
+                        } else if (destino.getCedula().equals(usuario.getCedula())) {
+                            System.out.println("❌ Error: No puedes transferirte a ti mismo.");
+                        } else {
+                            Transferencia transf = new Transferencia(monto, usuario, destino); //
+                            transf.getInfoTransaccion();
+                            RepositorioTransacciones.guardarTransaccion(transf);
+                            System.out.println("✅ Transferencia exitosa.");
+                            break;
+                        }
                     }
                     break;
             }
@@ -294,23 +332,25 @@ public class Main {
                         System.out.println("(El repositorio está vacío)");
                     } else {
                         for (Usuario u : usuarios) {
-                            System.out.println("- " + u.getNombre() + " | Alias: " + u.getAlias() + " | C.I: " + u.getCedula());
+                            System.out.println("- " + u.getNombre() + " | Alias: " + u.getAlias() + " | C.I: " + u.getCedula()+" | Saldo: " + u.getBilletera().getSaldo());
                         }
                     }
                     break;
 
                 case 2: // --- CONSULTAR REPOSITORIO DE TRANSACCIONES (Buscar una específica) ---
-                    System.out.print("Ingrese el ID de la transacción a buscar (ej. TRX-1): ");
-                    String idBuscar = sc.nextLine();
-                    Transaccion tEncontrada = RepositorioTransacciones.buscarPorID(idBuscar);
+                    while (true){
+                        System.out.print("Ingrese el ID de la transacción a buscar (ej. TRX-1): ");
+                        String idBuscar = sc.nextLine();
+                        Transaccion tEncontrada = RepositorioTransacciones.buscarPorID(idBuscar);
 
-                    if (tEncontrada != null) {
-                        System.out.println("\n--- Detalle de Transacción ---");
-                        tEncontrada.getInfoTransaccion();
-                    } else {
-                        System.out.println("⚠ No se encontró ninguna transacción con el ID: " + idBuscar);
-                    }
-                    break;
+                        if (tEncontrada != null) {
+                            System.out.println("\n--- Detalle de Transacción ---");
+                            tEncontrada.getInfoTransaccion();
+                            break;
+                        } else {
+                            System.out.println("⚠ No se encontró ninguna transacción con el ID: " + idBuscar);
+                        }
+                    }break;
 
                 case 3: // --- VER TRANSACCIONES TOTALES (Historial completo) ---
                     List<Transaccion> historial = RepositorioTransacciones.obtenerHistorialGlobal();
