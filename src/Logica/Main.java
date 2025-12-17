@@ -27,7 +27,6 @@ public class Main {
         cargarDatosDePrueba();
 
         while (activo) {
-
             try {
                 // Se usa el Menu para mostrar las opciones visualmente iguales
                 Menu.mostrarOpciones("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
