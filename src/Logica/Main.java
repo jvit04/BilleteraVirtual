@@ -27,7 +27,7 @@ public class Main {
         cargarDatosDePrueba();
 
         while (activo) {
-            limpiarPantalla();
+
             try {
                 // Se usa el Menu para mostrar las opciones visualmente iguales
                 Menu.mostrarOpciones("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
@@ -192,6 +192,9 @@ public class Main {
                         System.out.println("Cerrando sesión... ¡Hasta luego!");
                         activo = false;
                         break;
+                }
+                if (activo) {
+                    esperarEnter();
                 }
 
             } catch (Exception e) {
@@ -425,5 +428,9 @@ public class Main {
     public static void limpiarPantalla() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+    }
+    private static void esperarEnter() {
+        System.out.println("\nPresione Enter para continuar...");
+        sc.nextLine(); // Espera a que el usuario presione Enter
     }
 }
