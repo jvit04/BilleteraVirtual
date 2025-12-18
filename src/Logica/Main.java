@@ -7,8 +7,6 @@ import java.util.List;
 
 public class Main {
 
-    // Incluso el menú principal podría tener su propia clase "MenuPrincipal",
-    // pero para no crear tantos archivos, lo dejamos aquí o usamos la misma lógica.
     private static final String[] OPCIONES_PRINCIPAL = {
             "Registro de usuario",
             "Consultas de usuario",
@@ -26,8 +24,7 @@ public class Main {
 
         while (activo) {
             try {
-                // Usamos UI directamente aquí, o podrías crear class MenuPrincipal extends Menu
-                int opcion = UI.pedirOpcionMenu("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
+                int opcion = UI.pedirOpcionMenu("Menú Principal", OPCIONES_PRINCIPAL);
                 if (opcion == 0) opcion = 5; // Forzar salida si cierra ventana
 
                 switch (opcion) {
@@ -50,14 +47,11 @@ public class Main {
         }
     }
 
-    // --- MÉTODOS DE LÓGICA ---
 
     // Este método ahora usa MenuUsuario para pedir la opción
     private static void realizarTransaccionInteractiva(Usuario usuario) {
-        // 1. Llamamos a la clase MenuUsuario para obtener la opción
         int tipo = MenuUsuario.mostrar();
 
-        // Si elige "Volver" (5) o cierra la ventana, salimos
         if (tipo == 5 || tipo == 0) return;
 
         double monto;
@@ -122,7 +116,6 @@ public class Main {
     private static void manejarMenuAdministrador() {
         int opcion;
         do {
-            // 1. Usamos la clase MenuAdministrador
             opcion = MenuAdministrador.mostrar();
 
             switch (opcion) {
@@ -147,7 +140,7 @@ public class Main {
                     }
                     break;
 
-                case 3: // Buscar Transacción (Antes era caso 2)
+                case 3:
                     String id = UI.pedirDato("ID Transacción (ej. TRX-1):");
                     if (id != null) {
                         Transaccion t = RepositorioTransacciones.buscarPorID(id);
@@ -159,14 +152,14 @@ public class Main {
                     }
                     break;
 
-                case 4: // Historial Global (Antes era caso 3)
+                case 4:
                     List<Transaccion> hist = RepositorioTransacciones.obtenerHistorialGlobal();
                     StringBuilder sbTrx = new StringBuilder("--- Transacciones ---\n");
                     for (Transaccion t : hist) sbTrx.append(t.getIdTransaccion()).append(" | $").append(t.getMonto()).append("\n");
                     UI.mostrarMensaje(sbTrx.toString());
                     break;
 
-                case 5: // Cargar archivo (Antes era caso 4)
+                case 5:
                     String arch = UI.pedirDato("Nombre archivo usuarios:");
                     if (arch != null) new RepositorioUsuarios().cargarDesdeArchivo(arch);
                     break;
@@ -177,12 +170,10 @@ public class Main {
         } while (opcion != 6);
     }
 
-    // --- MÉTODOS AUXILIARES (Refactorizados con UI) ---
 
     private static void registrarUsuario() {
         String cedula = "";
 
-        // Bucle para pedir Cédula
         while (true) {
             cedula = UI.pedirDato("Ingrese Cédula para el nuevo registro:");
             if (cedula == null) return; // Si cancela, volvemos al menú
@@ -193,7 +184,7 @@ public class Main {
                     UI.mostrarError("Error: Esa cédula ya está registrada.");
                     continue;
                 }
-                break; // Cédula válida
+                break;
             } catch (CedulaInvalidaException e) {
                 UI.mostrarError(e.getMessage());
             }
@@ -319,8 +310,6 @@ public class Main {
             Transferencia t1 = new Transferencia(200.00, u2, u1);
             RepositorioTransacciones.guardarTransaccion(t1);
 
-            // Opcional: Avisar que se cargaron datos
-            // UI.mostrarMensaje("Datos de prueba cargados correctamente.");
         } catch (Exception e) {
             System.out.println("Error carga prueba: " + e.getMessage());
         }
