@@ -14,7 +14,7 @@ public abstract class Transaccion implements Serializable {
     protected double monto;
     protected String idTransaccion;
     private LocalDateTime fechaHora;
-    private DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
+    private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm");
     private String fechaFormateada;
     protected Usuario usuario;
     private static int contadorID; // es estatico porque no sera unico de cada instancia
@@ -24,7 +24,7 @@ public abstract class Transaccion implements Serializable {
         this.monto = monto;
         this.usuario = usuario;
         this.fechaHora = LocalDateTime.now();
-        this.fechaFormateada = this.fechaHora.format(formato);
+        this.fechaFormateada = this.fechaHora.format(FORMATO);
         contadorID++;
         this.idTransaccion = "TRX-" + contadorID;
     }
@@ -46,7 +46,9 @@ public abstract class Transaccion implements Serializable {
     public void validarTransaccion(){ //va a ser aplicado polimorfismo en cada transaccion
     }
 
-    //public abstract boolean esIngreso(); // va a ser aplicada polimorfismo
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
     public String getIdTransaccion() {
         return idTransaccion;
@@ -55,5 +57,16 @@ public abstract class Transaccion implements Serializable {
     public Usuario getUsuario() {
         return usuario;
     }
+
+    public static void setContadorID(int contadorID) {
+        Transaccion.contadorID = contadorID;
+    }
+
+
+    @Override
+    public String toString() {
+        return this.idTransaccion + " | " + this.getClass().getSimpleName() + " | $" + this.monto + " | " + this.fechaFormateada;
+    }
 }
+
 

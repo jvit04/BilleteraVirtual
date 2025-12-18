@@ -1,6 +1,7 @@
 package Repositorios;
 
 import Logica.Excepciones.CredencialYaExistenteException;
+import Logica.UI;
 import Logica.Usuario;
 import Logica.Validador;
 import Paths.Paths;
@@ -34,6 +35,12 @@ public class RepositorioUsuarios implements Repositorio<Usuario>, Almacenable {
         Validador.validarUsuarioExistente(nuevoUsuario.getAlias());
         Validador.validarCedulaNoRegistrada(mapaUsuarios, nuevoUsuario);
         mapaUsuarios.put(nuevoUsuario.getCedula(), nuevoUsuario);
+        try{
+            new RepositorioUsuarios().guardarEnArchivo();
+        }
+        catch(IOException e){
+            UI.mostrarError("⚠ Advertencia: El usuario se registró en memoria pero no se pudo guardar en el archivo: " + e.getMessage());
+        }
     }
 
     public static Usuario buscarPorCedula(String cedula) {
@@ -47,6 +54,10 @@ public class RepositorioUsuarios implements Repositorio<Usuario>, Almacenable {
             }
         }
         return null;
+    }
+
+    public static Map<String, Usuario> getMapaUsuarios() {
+        return mapaUsuarios;
     }
 
     public static boolean existeAlias(String alias){
@@ -87,16 +98,29 @@ public class RepositorioUsuarios implements Repositorio<Usuario>, Almacenable {
     @Override
     public void cargarDesdeArchivo(String archivo) {
         try {
-            // Usamos la herramienta para leer los datos
-            Map<String, Usuario> datosCargados = servicioPersistencia.cargar(archivo);
+            Map<String, Usuario> datosDelArchivo = servicioPersistencia.cargar(archivo);
 
-            // Si cargó bien, actualizamos el mapa en memoria
-            if (datosCargados != null) {
-                mapaUsuarios = datosCargados;
-                System.out.println("Base de datos de usuarios cargada exitosamente.");
+            if (datosDelArchivo != null) {
+                int nuevos = 0;
+                for (Usuario u : datosDelArchivo.values()) {
+                    //si NO existe en memoria (putIfAbsent)
+                    if (!mapaUsuarios.containsKey(u.getCedula())) {
+                        mapaUsuarios.put(u.getCedula(), u);
+                        nuevos++;
+                    }
+                }
+
+
+                if (nuevos > 0) {
+
+                    Logica.UI.mostrarMensaje("✅ Se han importado " + nuevos + " usuarios desde el archivo.");
+
+                } else {
+                    Logica.UI.mostrarMensaje("⚠ El archivo se leyó, pero todos los usuarios ya estaban cargados.");
+                }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("No se pudo cargar el archivo (se iniciará vacío o con datos previos): " + e.getMessage());
+            Logica.UI.mostrarError("Error al cargar archivo: " + e.getMessage());
         }
     }
 }

@@ -128,7 +128,7 @@ public class Main {
                     UI.mostrarMensaje(sb.toString());
                     break;
 
-                case 2: // NUEVA OPCIÓN: Consulta por Alias
+                case 2:
                     String alias = UI.pedirDato("Ingrese el alias a buscar:");
                     if (alias != null) {
                         Usuario u = RepositorioUsuarios.buscarPorAlias(alias);
@@ -155,7 +155,7 @@ public class Main {
                 case 4:
                     List<Transaccion> hist = RepositorioTransacciones.obtenerHistorialGlobal();
                     StringBuilder sbTrx = new StringBuilder("--- Transacciones ---\n");
-                    for (Transaccion t : hist) sbTrx.append(t.getIdTransaccion()).append(" | $").append(t.getMonto()).append("\n");
+                    for (Transaccion t : hist) sbTrx.append(t.toString()).append("\n");
                     UI.mostrarMensaje(sbTrx.toString());
                     break;
 
@@ -164,10 +164,14 @@ public class Main {
                     if (arch != null) new RepositorioUsuarios().cargarDesdeArchivo(arch);
                     break;
 
-                case 6: // Volver
+                case 6:
+                    String arT = UI.pedirDato("Nombre archivo transacciones:");
+                    if (arT != null) new RepositorioTransacciones().cargarDesdeArchivo(arT);
+                    break;
+                case 7:
                     break;
             }
-        } while (opcion != 6);
+        } while (opcion != 7);
     }
 
 
@@ -290,28 +294,39 @@ public class Main {
 
 
     private static void cargarDatosDePrueba() {
-        // Este método se mantiene igual, ya que solo carga datos en memoria
-        // Podrías quitar los System.out.println internos si quieres que sea totalmente silencioso
+        // Este método permite cargar datos de prueba en un archivo para posteriormente ser guardados.
+
         try {
             Usuario u1 = new Usuario("1111111111", "José Viteri", "Quito", "jose04", "jviteri@2004gmail.com");
             Usuario u2 = new Usuario("2222222222", "Paula Martillo", "Guayaquil", "pau123", "pau123@gmail.com");
             Usuario u3 = new Usuario("3333333333", "Rafael Brito", "Cuenca", "rbrito42", "rbrito@hotmail.com");
 
-            RepositorioUsuarios.guardarUsuario(u1);
-            RepositorioUsuarios.guardarUsuario(u2);
-            RepositorioUsuarios.guardarUsuario(u3);
+
+            RepositorioUsuarios.getMapaUsuarios().put(u1.getCedula(), u1);
+            RepositorioUsuarios.getMapaUsuarios().put(u2.getCedula(), u2);
+            RepositorioUsuarios.getMapaUsuarios().put(u3.getCedula(), u3);
+
+            new RepositorioUsuarios().guardarEnArchivo();
+            RepositorioUsuarios.getMapaUsuarios().clear();
 
             Deposito d1 = new Deposito(500.00, u1);
-            RepositorioTransacciones.guardarTransaccion(d1);
+            RepositorioTransacciones.getMapaTransacciones().put(d1.getIdTransaccion(), d1);
             Deposito d2 = new Deposito(1000.00, u2);
-            RepositorioTransacciones.guardarTransaccion(d2);
+            RepositorioTransacciones.getMapaTransacciones().put(d2.getIdTransaccion(), d2);
             Retiro r1 = new Retiro(u1, 50.00);
-            RepositorioTransacciones.guardarTransaccion(r1);
+            RepositorioTransacciones.getMapaTransacciones().put(r1.getIdTransaccion(), r1);
+
             Transferencia t1 = new Transferencia(200.00, u2, u1);
-            RepositorioTransacciones.guardarTransaccion(t1);
+            RepositorioTransacciones.getMapaTransacciones().put(t1.getIdTransaccion(), t1);
+            new RepositorioTransacciones().guardarEnArchivo();
+            RepositorioTransacciones.getMapaTransacciones().clear();
+            RepositorioTransacciones.obtenerHistorialGlobal().clear();
+
+
 
         } catch (Exception e) {
             System.out.println("Error carga prueba: " + e.getMessage());
         }
+
     }
 }

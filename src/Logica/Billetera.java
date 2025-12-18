@@ -41,11 +41,11 @@ private List<Transaccion> transacciones;
         } // nos devuelve la lista de transacciones
 
     //Metodo para aumentar el Saldo, empleado dependiendo de las distintas transacciones
-    protected void aumentarSaldo(double monto){
+    public void aumentarSaldo(double monto){
     saldo+=monto;
     }
     //Metodo para restar el Saldo, empleado dependiendo de las distintas transacciones
-    protected void restarSaldo(double monto){saldo-=monto;}
+    public void restarSaldo(double monto){saldo-=monto;}
 
 
     /**
