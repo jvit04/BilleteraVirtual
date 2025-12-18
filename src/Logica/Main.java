@@ -4,15 +4,11 @@ import Logica.Excepciones.*;
 import Repositorios.RepositorioUsuarios;
 import Repositorios.RepositorioTransacciones;
 import java.util.List;
-import java.util.Scanner;
 
-import static Logica.Menu.sc;
-
-//Para ejecutar el programa desde terminal usar: java Logica.Main
 public class Main {
 
-
-
+    // Incluso el menú principal podría tener su propia clase "MenuPrincipal",
+    // pero para no crear tantos archivos, lo dejamos aquí o usamos la misma lógica.
     private static final String[] OPCIONES_PRINCIPAL = {
             "Registro de usuario",
             "Consultas de usuario",
@@ -24,378 +20,288 @@ public class Main {
     public static void main(String[] args) {
         boolean activo = true;
 
-        System.out.println("Iniciando sistema de Billetera Virtual...");
+        UI.mostrarMensaje("Iniciando sistema de Billetera Virtual...");
 
         cargarDatosDePrueba();
 
         while (activo) {
-            limpiarPantalla();
             try {
-                // Se usa el Menu para mostrar las opciones visualmente iguales
-                Menu.mostrarOpciones("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
-
-                // Se envia tamaño del arreglo dinámicamente
-                int opcion = Menu.elegirOpcion(OPCIONES_PRINCIPAL.length);
+                // Usamos UI directamente aquí, o podrías crear class MenuPrincipal extends Menu
+                int opcion = UI.pedirOpcionMenu("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
+                if (opcion == 0) opcion = 5; // Forzar salida si cierra ventana
 
                 switch (opcion) {
-                    case 1: // --- REGISTRO DE USUARIO ---
-                        System.out.println("\n--- Registro de Nuevo Usuario ---");
+                    case 1: registrarUsuario(); break;
+                    case 2: consultarSaldo(); break;
+                    case 3: prepararTransaccion(); break;
 
-                        String cedula = "";
-                        boolean cancelarRegistro = false; // Bandera para saber si canceló
-
-
-                            while(true) {
-                                System.out.print("Ingrese Cédula (o '0' para cancelar): ");
-                                cedula = sc.nextLine();
-
-                                if (cedula.equals("0")) {
-                                    cancelarRegistro = true;
-                                    break;
-                                }
-
-                                try {
-                                    Validador.validarCedula(cedula); //
-                                    if (RepositorioUsuarios.buscarPorCedula(cedula) != null) {
-                                        System.out.println("⚠ Error: Esa cédula ya está registrada.");
-                                        continue;
-                                    }
-                                    break;
-                                } catch (CedulaInvalidaException e) {
-                                    System.out.println("⚠ " + e.getMessage());
-                                }
-                            }
-
-                        if (cancelarRegistro) {
-                            System.out.println("Registro cancelado.");
-                            break; // Sale del case 1 y vuelve al menú principal
-                        }
-
-                        String nombre;
-                        while (true) {
-                            try {
-                                System.out.print("Ingrese Nombre Completo: ");
-                                nombre = sc.nextLine();
-                                Validador.validarNombreCampo(nombre);
-                                break;
-                            } catch (IllegalArgumentException e) {
-                                System.out.println("⚠ " + e.getMessage());
-                            }
-                        }
-                        String ciudad;
-                        while (true) {
-                            try {
-                                System.out.print("Ingrese Ciudad: ");
-                                ciudad = sc.nextLine();
-                                Validador.validarNombreCampo(ciudad);
-                                break;
-                            } catch (IllegalArgumentException e) {
-                                System.out.println("⚠ " + e.getMessage());
-                            }
-                        }
-
-                        String alias;
-                        while (true){
-                            try {
-                                System.out.print("Ingrese Alias: ");
-                                alias = sc.nextLine();
-                                Validador.validarAlias(alias);
-                                break;
-                            }
-                            catch (AliasInvalidoException e){
-                                System.out.println("⚠ " + e.getMessage());
-                            }
-                        }
-
-
-                        String email;
-                        while (true){
-                            try {
-                                System.out.print("Ingrese Email: ");
-                                email = sc.nextLine();
-                                Validador.validarCorreo(email);
-                                break;
-                            }
-                            catch (EmailNoValidoException e){
-                                System.out.println("⚠ " + e.getMessage());
-                            }
-                        }
-
-                        try {
-                            Usuario usuarioActual = new Usuario(cedula, nombre, ciudad, alias, email); //
-                            RepositorioUsuarios.guardarUsuario(usuarioActual); //
-                            System.out.println("¡Bienvenido, " + usuarioActual.getNombre() + "! Has sido registrado exitosamente.");
-                        } catch (CredencialYaExistenteException e) {
-                            System.out.println("\n[!] Error: " + e.getMessage());
-                        }
+                    case 4:
+                        manejarMenuAdministrador(); // <--- Aquí usamos la nueva clase
                         break;
 
-                    case 2: // --- CONSULTA DE SALDO ---
-                        System.out.println("\n--- Consulta de Saldo ---");
-
-                        String cedulaConsulta;
-                        while(true) {
-                            //Para hacer que se pueda consultar por alias habría que hacer un hashmap con alias, usuario.
-                            System.out.print("Ingrese Cédula: ");
-                            cedulaConsulta = sc.nextLine();
-                            try {
-                                Validador.validarCedula(cedulaConsulta);
-
-                            } catch (CedulaInvalidaException e) {
-                                System.out.println("⚠ " + e.getMessage());
-                            }
-
-                            Usuario usuarioConsulta = RepositorioUsuarios.buscarPorCedula(cedulaConsulta);
-
-                            if (usuarioConsulta != null) {
-                                System.out.println("Hola, " + usuarioConsulta.getNombre());
-                                System.out.println("Alias: " + usuarioConsulta.getAlias());
-                                usuarioConsulta.getBilletera().infoSaldo(); //
-                                break;
-                            } else {
-                                System.out.println("⚠ Error: Usuario no encontrado.");
-                            }
-
-                        }
-
-                        break;
-
-                    case 3: // --- REALIZAR TRANSACCIÓN ---
-                        System.out.println("\n--- Realizar Transacción ---");
-                        while(true) {
-
-                        String cedulaOperacion;
-                        System.out.print("Ingrese su Cédula para operar: ");
-                        cedulaOperacion = sc.nextLine();
-                            try {
-                                Validador.validarCedula(cedulaOperacion);
-
-                            } catch (CedulaInvalidaException e) {
-                                System.out.println("⚠ " + e.getMessage());
-                            }
-
-                        Usuario usuarioOperacion = RepositorioUsuarios.buscarPorCedula(cedulaOperacion);
-
-                        if (usuarioOperacion != null) {
-                            System.out.println("Bienvenido/a " + usuarioOperacion.getNombre());
-                            realizarTransaccionInteractiva(usuarioOperacion);
-                            break;
-                        } else {
-                            System.out.println("⚠ Error: Usuario no encontrado.");
-                        }
-                        }
-                        break;
-
-                    case 4: // --- MENÚ ADMINISTRADOR ---
-                        manejarMenuAdministrador();
-                        limpiarPantalla();
-                        break;
-
-                    case 5: // --- SALIR ---
-                        System.out.println("Cerrando sesión... ¡Hasta luego!");
+                    case 5:
+                        UI.mostrarMensaje("Cerrando sesión... ¡Hasta luego!");
                         activo = false;
                         break;
                 }
-                if (activo) {
-                    esperarEnter();
-                }
-
             } catch (Exception e) {
-                // Captura cualquier error inesperado para que el programa no se cierre de golpe
-                System.out.println("\n[!] Ocurrió un error inesperado: " + e.getMessage());
+                UI.mostrarError("[!] Error crítico: " + e.getMessage());
             }
         }
     }
 
-    // --- MÉTODOS AUXILIARES ---
+    // --- MÉTODOS DE LÓGICA ---
 
+    // Este método ahora usa MenuUsuario para pedir la opción
     private static void realizarTransaccionInteractiva(Usuario usuario) {
-        // Muestra menú de depósito, retiro, etc.
-        MenuUsuario.mostrar(); //
-        int tipo = MenuUsuario.pedirOpcion();
+        // 1. Llamamos a la clase MenuUsuario para obtener la opción
+        int tipo = MenuUsuario.mostrar();
 
-        if (tipo == -1) return; // Si hubo error en la selección, volvemos
+        // Si elige "Volver" (5) o cierra la ventana, salimos
+        if (tipo == 5 || tipo == 0) return;
 
         double monto;
         while (true) {
-            System.out.print("Ingrese el monto a operar: $");
+            String montoStr = UI.pedirDato("Ingrese el monto a operar: $");
+            if (montoStr == null) return;
             try {
-                monto = Double.parseDouble(sc.nextLine());
+                monto = Double.parseDouble(montoStr);
                 Validador.validarMonto(monto);
-                Validador.validarTransaccion(usuario,monto);
+                if (tipo != 1) { // Si no es depósito, validamos saldo
+                    Validador.validarTransaccion(usuario, monto);
+                }
                 break;
             } catch (NumberFormatException e) {
-                System.out.println("⚠ Monto inválido. Debe ser un número.");
-            } catch (MontoInvalidoException e) {
-                System.out.println("⚠ Monto inválido. No acepta negativos ni cero.");
+                UI.mostrarError("Monto inválido.");
+            } catch (Exception e) {
+                UI.mostrarError(e.getMessage());
             }
-//            catch (SaldoInsuficienteException e){
-//                System.out.println(e.getMessage());
-//            }
-            //Nota: no es recomendable hacer el catch de saldo insuficiente con transacción que resten saldo,
-            //debido a que si un usuario tiene $0 lo deja en un bucle infinito.
         }
 
         try {
             switch (tipo) {
                 case 1: // Depósito
-                    Deposito deposito = new Deposito(monto, usuario); //
-                    deposito.getInfoTransaccion();
-                    RepositorioTransacciones.guardarTransaccion(deposito); //
-                    System.out.println("✅ Depósito guardado en historial.");
+                    Deposito deposito = new Deposito(monto, usuario);
+                    RepositorioTransacciones.guardarTransaccion(deposito);
+                    UI.mostrarMensaje("✅ Depósito realizado.");
                     break;
-
                 case 2: // Retiro
-                    Retiro retiro = new Retiro(usuario, monto); //
-                    retiro.getInfoTransaccion();
+                    Retiro retiro = new Retiro(usuario, monto);
                     RepositorioTransacciones.guardarTransaccion(retiro);
-                    System.out.println("✅ Retiro guardado en historial.");
+                    UI.mostrarMensaje("✅ Retiro realizado.");
                     break;
-
                 case 3: // Pago Servicio
-                    String servicio = "";
-                    while (true) {
-                        System.out.print("Ingrese tipo de servicio: ");
-                        try {
-                            servicio = sc.nextLine();
-                            Validador.validarNombreCampo(servicio);
-                            break;
-                        } catch (IllegalArgumentException e) {
-                            System.out.println("Servicio invalido, intente nuevamente.");
-                        }
-
+                    String servicio = UI.pedirDato("Tipo de servicio:");
+                    String empresa = UI.pedirDato("Nombre de empresa:");
+                    if (servicio != null && empresa != null) {
+                        PagoServicio pago = new PagoServicio(monto, usuario, empresa, servicio);
+                        RepositorioTransacciones.guardarTransaccion(pago);
+                        UI.mostrarMensaje("✅ Pago registrado.");
                     }
-                    String empresa = "";
-                    while (true) {
-                        System.out.print("Ingrese nombre de la empresa: ");
-                        try {
-                            empresa = sc.nextLine();
-                            Validador.validarNombreCampo(empresa);
-                            break;
-                        } catch (IllegalArgumentException e) {
-                            System.out.println("Nombre de empresa invalido, intente nuevamente.");
-                        }
-                    }
-
-                    while(empresa.trim().isEmpty()){
-                        System.out.print("⚠ El nombre no puede estar vacío: ");
-                        empresa = sc.nextLine();
-                    }
-
-
-                    PagoServicio pago = new PagoServicio(monto, usuario, empresa, servicio); //
-                    pago.getInfoTransaccion();
-                    RepositorioTransacciones.guardarTransaccion(pago);
-                    System.out.println("✅ Pago guardado en historial.");
                     break;
-
                 case 4: // Transferencia
-                    String aliasDestino = "";
-                    while (true) {
-                        try {
-
-                            System.out.print("Ingrese el ALIAS del destinatario: ");
-                            aliasDestino = sc.nextLine();
-                            Validador.validarAlias(aliasDestino);
-                        } catch (AliasInvalidoException e) {
-                            System.out.println("Alias invalido, intente nuevamente.");
-                        }
-
-
-                        Usuario destino = RepositorioUsuarios.buscarPorAlias(aliasDestino);
-
-                        if (destino == null) {
-                            System.out.println("❌ Error: El alias '" + aliasDestino + "' no existe.");
-                        } else if (destino.getCedula().equals(usuario.getCedula())) {
-                            System.out.println("❌ Error: No puedes transferirte a ti mismo.");
-                        } else {
-                            Transferencia transf = new Transferencia(monto, usuario, destino); //
-                            transf.getInfoTransaccion();
+                    String alias = UI.pedirDato("Alias del destinatario:");
+                    if (alias != null) {
+                        Usuario destino = RepositorioUsuarios.buscarPorAlias(alias);
+                        if (destino != null && !destino.getCedula().equals(usuario.getCedula())) {
+                            Transferencia transf = new Transferencia(monto, usuario, destino);
                             RepositorioTransacciones.guardarTransaccion(transf);
-                            System.out.println("✅ Transferencia exitosa.");
-                            break;
+                            UI.mostrarMensaje("✅ Transferencia realizada.");
+                        } else {
+                            UI.mostrarError("Destinatario inválido.");
                         }
                     }
                     break;
             }
-        } catch (SaldoInsuficienteException | MontoInvalidoException e) { //
-            System.out.println("\n[!] No se pudo realizar la transacción: " + e.getMessage());
+        } catch (Exception e) {
+            UI.mostrarError("Error en transacción: " + e.getMessage());
         }
     }
 
+    // Este método usa MenuAdministrador y maneja las NUEVAS opciones
     private static void manejarMenuAdministrador() {
-        int opAdmin;
+        int opcion;
         do {
-            // Muestra el menú con las nuevas opciones
-            MenuAdministrador.mostrar();
-            opAdmin = MenuAdministrador.pedirOpcion();
+            // 1. Usamos la clase MenuAdministrador
+            opcion = MenuAdministrador.mostrar();
 
-            switch (opAdmin) {
-                case 1: // --- CONSULTAR REPOSITORIO DE USUARIOS ---
+            switch (opcion) {
+                case 1: // Ver usuarios
                     List<Usuario> usuarios = RepositorioUsuarios.obtenerTodosStatic();
-                    System.out.println("\n--- Repositorio de Usuarios (" + usuarios.size() + ") ---");
-                    if (usuarios.isEmpty()) {
-                        System.out.println("(El repositorio está vacío)");
-                    } else {
-                        for (Usuario u : usuarios) {
-                            System.out.println("- " + u.getNombre() + " | Alias: " + u.getAlias() + " | C.I: " + u.getCedula()+" | Saldo: " + u.getBilletera().getSaldo());
-                        }
+                    StringBuilder sb = new StringBuilder("--- Usuarios ---\n");
+                    for (Usuario u : usuarios) {
+                        sb.append(u.toString()).append("\n");
                     }
+                    UI.mostrarMensaje(sb.toString());
                     break;
 
-                case 2: // --- CONSULTAR REPOSITORIO DE TRANSACCIONES (Buscar una específica) ---
-                    while (true){
-                        System.out.print("Ingrese el ID de la transacción a buscar (ej. TRX-1): ");
-                        String idBuscar = sc.nextLine();
-                        Transaccion tEncontrada = RepositorioTransacciones.buscarPorID(idBuscar);
-
-                        if (tEncontrada != null) {
-                            System.out.println("\n--- Detalle de Transacción ---");
-                            tEncontrada.getInfoTransaccion();
-                            break;
+                case 2: // NUEVA OPCIÓN: Consulta por Alias
+                    String alias = UI.pedirDato("Ingrese el alias a buscar:");
+                    if (alias != null) {
+                        Usuario u = RepositorioUsuarios.buscarPorAlias(alias);
+                        if (u != null) {
+                            UI.mostrarMensaje("Usuario encontrado:\n" + u.getNombre() + "\nCédula: " + u.getCedula());
                         } else {
-                            System.out.println("⚠ No se encontró ninguna transacción con el ID: " + idBuscar);
-                        }
-                    }break;
-
-                case 3: // --- VER TRANSACCIONES TOTALES (Historial completo) ---
-                    List<Transaccion> historial = RepositorioTransacciones.obtenerHistorialGlobal();
-                    System.out.println("\n--- Historial Global de Transacciones (" + historial.size() + ") ---");
-                    if (historial.isEmpty()) {
-                        System.out.println("(No hay transacciones registradas)");
-                    } else {
-                        for (Transaccion t : historial) {
-                            // Mostramos un resumen rápido
-                            System.out.println("- " + t.getIdTransaccion() + " | $" + t.getMonto() + " | Tipo: " + t.getClass().getSimpleName());
+                            UI.mostrarError("Usuario no encontrado con alias: " + alias);
                         }
                     }
                     break;
 
-                case 4: // --- CARGAR DESDE ARCHIVO --- aun en proceso, no se ha hecho
-                    System.out.println("\n--- Carga de Datos ---");
-                    System.out.print("Ingrese el nombre del archivo de usuarios: ");
-                    String archivoUsuarios = sc.nextLine();
-
-
-                    new RepositorioUsuarios().cargarDesdeArchivo(archivoUsuarios);
-                    System.out.println("ℹ Llamada a carga de usuarios realizada (Revisar implementación en RepositorioUsuarios).");
-
-
-                    System.out.println("ℹ La carga de transacciones se realizaría de forma similar.");
+                case 3: // Buscar Transacción (Antes era caso 2)
+                    String id = UI.pedirDato("ID Transacción (ej. TRX-1):");
+                    if (id != null) {
+                        Transaccion t = RepositorioTransacciones.buscarPorID(id);
+                        if (t != null) {
+                            UI.mostrarMensaje("ID: " + t.getIdTransaccion() + "\nMonto: " + t.getMonto());
+                        } else {
+                            UI.mostrarError("No encontrada.");
+                        }
+                    }
                     break;
 
-                case 5: // --- VOLVER ---
-                    System.out.println("Volviendo al menú principal...");
+                case 4: // Historial Global (Antes era caso 3)
+                    List<Transaccion> hist = RepositorioTransacciones.obtenerHistorialGlobal();
+                    StringBuilder sbTrx = new StringBuilder("--- Transacciones ---\n");
+                    for (Transaccion t : hist) sbTrx.append(t.getIdTransaccion()).append(" | $").append(t.getMonto()).append("\n");
+                    UI.mostrarMensaje(sbTrx.toString());
+                    break;
+
+                case 5: // Cargar archivo (Antes era caso 4)
+                    String arch = UI.pedirDato("Nombre archivo usuarios:");
+                    if (arch != null) new RepositorioUsuarios().cargarDesdeArchivo(arch);
+                    break;
+
+                case 6: // Volver
                     break;
             }
-        } while (opAdmin != 5);
+        } while (opcion != 6);
     }
-    // Agrega esto al final de la clase Main, junto a los otros métodos privados
-    private static void cargarDatosDePrueba() {
-        System.out.println("--- Cargando datos de prueba... ---");
+
+    // --- MÉTODOS AUXILIARES (Refactorizados con UI) ---
+
+    private static void registrarUsuario() {
+        String cedula = "";
+
+        // Bucle para pedir Cédula
+        while (true) {
+            cedula = UI.pedirDato("Ingrese Cédula para el nuevo registro:");
+            if (cedula == null) return; // Si cancela, volvemos al menú
+
+            try {
+                Validador.validarCedula(cedula);
+                if (RepositorioUsuarios.buscarPorCedula(cedula) != null) {
+                    UI.mostrarError("Error: Esa cédula ya está registrada.");
+                    continue;
+                }
+                break; // Cédula válida
+            } catch (CedulaInvalidaException e) {
+                UI.mostrarError(e.getMessage());
+            }
+        }
+
+        String nombre;
+        while (true) {
+            nombre = UI.pedirDato("Ingrese Nombre Completo:");
+            if (nombre == null) return;
+            try {
+                Validador.validarNombreCampo(nombre);
+                break;
+            } catch (IllegalArgumentException e) {
+                UI.mostrarError(e.getMessage());
+            }
+        }
+
+        String ciudad;
+        while (true) {
+            ciudad = UI.pedirDato("Ingrese Ciudad:");
+            if (ciudad == null) return;
+            try {
+                Validador.validarNombreCampo(ciudad);
+                break;
+            } catch (IllegalArgumentException e) {
+                UI.mostrarError(e.getMessage());
+            }
+        }
+
+        String alias;
+        while (true) {
+            alias = UI.pedirDato("Ingrese Alias:");
+            if (alias == null) return;
+            try {
+                Validador.validarAlias(alias);
+                break;
+            } catch (AliasInvalidoException e) {
+                UI.mostrarError(e.getMessage());
+            }
+        }
+
+        String email;
+        while (true) {
+            email = UI.pedirDato("Ingrese Email:");
+            if (email == null) return;
+            try {
+                Validador.validarCorreo(email);
+                break;
+            } catch (EmailNoValidoException e) {
+                UI.mostrarError(e.getMessage());
+            }
+        }
+
         try {
-            // 1. Crear y registrar Usuarios
-            // Recuerda usar datos que pasen tus validaciones (cédula 10 dígitos, emails válidos, etc.)
+            Usuario usuarioActual = new Usuario(cedula, nombre, ciudad, alias, email);
+            RepositorioUsuarios.guardarUsuario(usuarioActual);
+            UI.mostrarMensaje("¡Bienvenido, " + usuarioActual.getNombre() + "!\nHas sido registrado exitosamente.");
+        } catch (CredencialYaExistenteException e) {
+            UI.mostrarError("Error al guardar: " + e.getMessage());
+        }
+    }
+
+    private static void consultarSaldo() {
+        String cedulaConsulta = UI.pedirDato("Ingrese Cédula para consultar saldo:");
+        if (cedulaConsulta == null) return;
+
+        try {
+            Validador.validarCedula(cedulaConsulta);
+            Usuario usuarioConsulta = RepositorioUsuarios.buscarPorCedula(cedulaConsulta);
+
+            if (usuarioConsulta != null) {
+                // Construimos el mensaje para la ventana
+                String mensaje = "Hola, " + usuarioConsulta.getNombre() + "\n" +
+                        "Alias: " + usuarioConsulta.getAlias() + "\n" +
+                        "Saldo actual: $" + usuarioConsulta.getBilletera().getSaldo();
+                UI.mostrarMensaje(mensaje);
+            } else {
+                UI.mostrarError("Error: Usuario no encontrado.");
+            }
+        } catch (CedulaInvalidaException e) {
+            UI.mostrarError(e.getMessage());
+        }
+    }
+
+    private static void prepararTransaccion() {
+        String cedulaOperacion = UI.pedirDato("Ingrese su Cédula para operar:");
+        if (cedulaOperacion == null) return;
+
+        try {
+            Validador.validarCedula(cedulaOperacion);
+            Usuario usuarioOperacion = RepositorioUsuarios.buscarPorCedula(cedulaOperacion);
+
+            if (usuarioOperacion != null) {
+                UI.mostrarMensaje("Bienvenido/a " + usuarioOperacion.getNombre());
+                realizarTransaccionInteractiva(usuarioOperacion);
+            } else {
+                UI.mostrarError("Error: Usuario no encontrado.");
+            }
+        } catch (CedulaInvalidaException e) {
+            UI.mostrarError(e.getMessage());
+        }
+    }
+
+
+    private static void cargarDatosDePrueba() {
+        // Este método se mantiene igual, ya que solo carga datos en memoria
+        // Podrías quitar los System.out.println internos si quieres que sea totalmente silencioso
+        try {
             Usuario u1 = new Usuario("1111111111", "José Viteri", "Quito", "jose04", "jviteri@2004gmail.com");
             Usuario u2 = new Usuario("2222222222", "Paula Martillo", "Guayaquil", "pau123", "pau123@gmail.com");
             Usuario u3 = new Usuario("3333333333", "Rafael Brito", "Cuenca", "rbrito42", "rbrito@hotmail.com");
@@ -404,38 +310,19 @@ public class Main {
             RepositorioUsuarios.guardarUsuario(u2);
             RepositorioUsuarios.guardarUsuario(u3);
 
-            // 2. Crear Transacciones iniciales (para que tengan saldo y movimiento)
-
-            // Depósitos iniciales (fondos)
-            Deposito d1 = new Deposito(500.00, u1); // Ana empieza con $500
+            Deposito d1 = new Deposito(500.00, u1);
             RepositorioTransacciones.guardarTransaccion(d1);
-
-            Deposito d2 = new Deposito(1000.00, u2); // Beto empieza con $1000
+            Deposito d2 = new Deposito(1000.00, u2);
             RepositorioTransacciones.guardarTransaccion(d2);
-
-            // Un retiro de Ana
             Retiro r1 = new Retiro(u1, 50.00);
             RepositorioTransacciones.guardarTransaccion(r1);
-
-            // Una transferencia de Beto a Ana
             Transferencia t1 = new Transferencia(200.00, u2, u1);
             RepositorioTransacciones.guardarTransaccion(t1);
 
-            System.out.println("✅ Datos de prueba cargados: 3 usuarios y 4 transacciones.");
-
+            // Opcional: Avisar que se cargaron datos
+            // UI.mostrarMensaje("Datos de prueba cargados correctamente.");
         } catch (Exception e) {
-            System.out.println("⚠ Error al cargar datos de prueba: " + e.getMessage());
+            System.out.println("Error carga prueba: " + e.getMessage());
         }
-        System.out.println("-----------------------------------\n");
-    }
-    public static void limpiarPantalla() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-    }
-    private static void esperarEnter() {
-        System.out.println("\nPresione Enter para continuar...");
-        try {
-            Menu.sc.nextLine();
-        } catch (Exception e) {}
     }
 }

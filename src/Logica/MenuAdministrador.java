@@ -1,19 +1,18 @@
 package Logica;
 
 public class MenuAdministrador extends Menu {
+
+    // Tus nuevas opciones
     private static final String[] OPCIONES = {
-            "Consultar en repositorio de usuarios",       // Opción 1
-            "Consultar en repositorio de transacciones",  // Opción 2
-            "Ver transacciones totales",                  // Opción 3
-            "Cargar desde archivo",                       // Opción 4
-            "Volver al menú principal"                    // Opción 5 (Necesaria para salir)
+            "Ver todos los usuarios",                    // Opción 1
+            "Consulta de usuario por alias",             // Opción 2 (NUEVA)
+            "Buscar transacción por ID",                 // Opción 3
+            "Ver historial global de transacciones",     // Opción 4
+            "Cargar desde archivo",                      // Opción 5
+            "Volver al menú principal"                   // Opción 6
     };
 
-    public static void mostrar() {
-        mostrarOpciones("Menú Administrador", OPCIONES);
-    }
-
-    public static int pedirOpcion() {
-        return elegirOpcion(OPCIONES.length);
+    public static int mostrar() {
+        return mostrarYSeleccionar("Menú Administrador", OPCIONES);
     }
 }

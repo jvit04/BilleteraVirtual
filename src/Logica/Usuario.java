@@ -68,4 +68,9 @@ public class Usuario implements Serializable{
     public String getNombre() {
         return nombre;
     }
+
+    @Override
+    public String toString() {
+        return this.nombre + " | " + this.cedula + " | " + this.alias;
+    }
 }

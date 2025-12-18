@@ -1,46 +1,25 @@
 package Logica;
 
-import java.util.Scanner;
-import Logica.Excepciones.OpcionMenuNoValidoException;
-
 public abstract class Menu {
-    protected static final Scanner sc = new Scanner(System.in);
+
+    // Eliminamos Scanner y excepciones de consola.
+    // Esta clase ahora sirve para delegar la construcción visual a la UI.
 
     /**
-     * Método genérico para mostrar cualquier menú basado en un array.
-     * @param titulo El título del menú
-     * @param OPCIONES El array de Strings con las opciones
+     * Método protegido que usan los hijos para lanzar su menú.
+     * @param titulo El título de la ventana.
+     * @param opciones El arreglo de strings con las opciones.
+     * @return El índice de la opción seleccionada (1, 2, 3...) ajustado para tu switch.
      */
-    protected static void mostrarOpciones(String titulo, String[] OPCIONES) {
+    protected static int mostrarYSeleccionar(String titulo, String[] opciones) {
+        // Delegamos todo el trabajo sucio a la clase UI
+        int opcion = UI.pedirOpcionMenu(titulo, opciones);
 
-        System.out.println("\n--- " + titulo + " ---");
-        for (int i = 0; i < OPCIONES.length; i++) {
-            // Imprime "1. Opción", "2. Opción", etc.
-            System.out.println((i + 1) + ". " + OPCIONES[i]);
+        // Si el usuario cierra la ventana (0), devolvemos una señal de salida
+        // En tus menús, la última opción suele ser "Salir" o "Volver".
+        if (opcion == 0) {
+            return opciones.length; // Retorna la última opción (Salir/Volver)
         }
-    }
-
-    /**
-     * Pide una opción y valida que esté entre 1 y el tamaño del array.
-     * @param cantidadOpciones El número máximo de opciones (array.length)
-     * @return La opción válida elegida por el usuario
-     */
-    protected static int elegirOpcion(int cantidadOpciones) {
-        System.out.print("Escoge una opción: ");
-        try {
-            // Leemos texto para evitar errores de buffer
-            int opcion = Integer.parseInt(sc.nextLine());
-
-            // Validar usando el tamaño del array
-        Validador.validarOpcion(opcion,cantidadOpciones);
-            return opcion;
-
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Debes ingresar un número.");
-            return -1;
-        } catch (OpcionMenuNoValidoException e) {
-            System.out.println("Error: " + e.getMessage());
-            return -1;
-        }
+        return opcion;
     }
 }

@@ -54,6 +54,9 @@ private List<Transaccion> transacciones;
     protected void agregarTransaccion(Transaccion transaccion){
         this.transacciones.add(transaccion);
     }
+
+    public static class UI {
+    }
 }
 
 
