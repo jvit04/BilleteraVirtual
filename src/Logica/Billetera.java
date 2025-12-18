@@ -1,8 +1,12 @@
 package Logica;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Billetera {
+public class Billetera implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     //Atributos
 private double saldo;
 private List<Transaccion> transacciones;

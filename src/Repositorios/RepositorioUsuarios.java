@@ -3,36 +3,43 @@ package Repositorios;
 import Logica.Excepciones.CredencialYaExistenteException;
 import Logica.Usuario;
 import Logica.Validador;
-import java.util.HashMap;
-import java.util.Map;
+import Paths.Paths;
+import Persistencia.Persistencia;
+import Persistencia.Persistible;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class RepositorioUsuarios implements Repositorio {
+// Implementa Repositorio (Lógica) y Almacenable (Archivos)
+public class RepositorioUsuarios implements Repositorio<Usuario>, Almacenable {
 
-    // Clave: Cédula (String), Valor: Usuario
+    // 1. Datos en Memoria (Static para mantener compatibilidad con Main y Validador)
     private static Map<String, Usuario> mapaUsuarios = new HashMap<>();
 
+    // 2. Herramienta de Persistencia (Composición)
+    // Usamos la interfaz Persistible para cumplir DIP (Inversión de Dependencias)
+    private Persistible<Map<String, Usuario>> servicioPersistencia;
+
     public RepositorioUsuarios() {
+        // Inicializamos la implementación concreta (Persistencia binaria)
+        this.servicioPersistencia = new Persistencia<Map<String, Usuario>>();
     }
 
+    // --- MÉTODOS ESTÁTICOS (LEGACY) ---
+    // Se mantienen intactos para que Main.java y Validador.java funcionen sin cambios
+
     public static void guardarUsuario(Usuario nuevoUsuario) throws CredencialYaExistenteException {
-        // 1. Validar que el alias no exista (recorriendo el mapa)
         Validador.validarUsuarioExistente(nuevoUsuario.getAlias());
-
-        // 2. Validar que la cédula (la CLAVE) no exista ya
         Validador.validarCedulaNoRegistrada(mapaUsuarios, nuevoUsuario);
-
-        // Si pasa las validaciones, lo metemos al mapa
         mapaUsuarios.put(nuevoUsuario.getCedula(), nuevoUsuario);
     }
 
-    // Búsqueda instantánea por cédula
     public static Usuario buscarPorCedula(String cedula) {
         return mapaUsuarios.get(cedula);
     }
 
-    // Búsqueda por alias
     public static Usuario buscarPorAlias(String alias) {
         for (Usuario u : mapaUsuarios.values()) {
             if (u.getAlias().equals(alias)) {
@@ -46,13 +53,50 @@ public class RepositorioUsuarios implements Repositorio {
         return buscarPorAlias(alias) != null;
     }
 
-    // Los valores del mapa se convierten a una lista para devolverlos todos
-    public static List<Usuario> obtenerTodos() {
+    // Usado por el menú de admin para listar
+    public static List<Usuario> obtenerTodosStatic() {
         return new ArrayList<>(mapaUsuarios.values());
+    }
+
+    // --- IMPLEMENTACIÓN DE INTERFAZ REPOSITORIO<Usuario> ---
+    // Estos métodos puentean a los estáticos
+
+    @Override
+    public void guardar(Usuario usuario) {
+        guardarUsuario(usuario);
+        // Nota: Si la interfaz no permite excepciones, deberás usar try-catch aquí
+    }
+
+    @Override
+    public Usuario buscar(String id) {
+        return buscarPorCedula(id);
+    }
+
+    public List<Usuario> obtenerTodos() {
+        return obtenerTodosStatic();
+    }
+
+    // --- IMPLEMENTACIÓN DE INTERFAZ ALMACENABLE (Manejo de Archivos) ---
+
+    @Override
+    public void guardarEnArchivo() throws IOException {
+        // El repositorio le dice a la herramienta QUÉ guardar y DÓNDE
+        servicioPersistencia.guardar(Paths.ARCHIVO_USUARIOS, mapaUsuarios);
     }
 
     @Override
     public void cargarDesdeArchivo(String archivo) {
-        // Lógica futura...
+        try {
+            // Usamos la herramienta para leer los datos
+            Map<String, Usuario> datosCargados = servicioPersistencia.cargar(archivo);
+
+            // Si cargó bien, actualizamos el mapa en memoria
+            if (datosCargados != null) {
+                mapaUsuarios = datosCargados;
+                System.out.println("Base de datos de usuarios cargada exitosamente.");
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("No se pudo cargar el archivo (se iniciará vacío o con datos previos): " + e.getMessage());
+        }
     }
 }

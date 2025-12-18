@@ -6,10 +6,12 @@ import Repositorios.RepositorioTransacciones;
 import java.util.List;
 import java.util.Scanner;
 
-//Para ejecutar el programa desde terminal usar: java -cp bin Logica.Main
+import static Logica.Menu.sc;
+
+//Para ejecutar el programa desde terminal usar: java Logica.Main
 public class Main {
 
-    private static Scanner sc = new Scanner(System.in);
+
 
     private static final String[] OPCIONES_PRINCIPAL = {
             "Registro de usuario",
@@ -27,6 +29,7 @@ public class Main {
         cargarDatosDePrueba();
 
         while (activo) {
+            limpiarPantalla();
             try {
                 // Se usa el Menu para mostrar las opciones visualmente iguales
                 Menu.mostrarOpciones("MENÚ PRINCIPAL", OPCIONES_PRINCIPAL);
@@ -185,6 +188,7 @@ public class Main {
 
                     case 4: // --- MENÚ ADMINISTRADOR ---
                         manejarMenuAdministrador();
+                        limpiarPantalla();
                         break;
 
                     case 5: // --- SALIR ---
@@ -328,7 +332,7 @@ public class Main {
 
             switch (opAdmin) {
                 case 1: // --- CONSULTAR REPOSITORIO DE USUARIOS ---
-                    List<Usuario> usuarios = RepositorioUsuarios.obtenerTodos();
+                    List<Usuario> usuarios = RepositorioUsuarios.obtenerTodosStatic();
                     System.out.println("\n--- Repositorio de Usuarios (" + usuarios.size() + ") ---");
                     if (usuarios.isEmpty()) {
                         System.out.println("(El repositorio está vacío)");
@@ -430,6 +434,8 @@ public class Main {
     }
     private static void esperarEnter() {
         System.out.println("\nPresione Enter para continuar...");
-        sc.nextLine(); // Espera a que el usuario presione Enter
+        try {
+            Menu.sc.nextLine();
+        } catch (Exception e) {}
     }
 }

@@ -1,9 +1,14 @@
 package Logica;
 
+
+import java.io.Serial;
+import java.io.Serializable;
 import  java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public abstract class Transaccion {
+public abstract class Transaccion implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     //atributos
     //private static final double  MAX_MONTO_TRANSACCION = 10000.00;  Se puede considerar implementar un monto maximo por transacción en el futuro
     protected double monto;
