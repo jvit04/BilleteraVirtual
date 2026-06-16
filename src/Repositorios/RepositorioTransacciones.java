@@ -29,7 +29,7 @@ public class RepositorioTransacciones implements Repositorio<Transaccion>, Almac
     public static void guardarTransaccion(Transaccion t) {
         mapaTransacciones.put(t.getIdTransaccion(), t);
         try{
-            new RepositorioTransacciones().guardarEnArchivo();
+            new RepositorioTransacciones(). guardarEnArchivo();
         }
         catch(IOException e){
             UI.mostrarError("⚠ Advertencia: El usuario se registró en memoria pero no se pudo guardar en el archivo: " + e.getMessage());

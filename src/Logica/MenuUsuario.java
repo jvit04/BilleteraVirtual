@@ -7,7 +7,7 @@ public class MenuUsuario extends Menu {
             "Retiro",
             "Pago de Servicios",
             "Transferencia",
-            "Volver" // Agregué "Volver" explícitamente para que coincida con la lógica
+            "Volver"
     };
 
     public static int mostrar() {
